@@ -1,0 +1,15 @@
+^data-raw$
+^.*\.Rproj$
+^\.Rproj\.user$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^index\.Rmd$
+^index\.md$
+^README\.Rmd$
+^\.github$
+^vignettes/articles$
+^tools$
+^\.git$
+^\.gitignore$
+^vignettes/.*\.html$

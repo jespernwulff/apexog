@@ -1,0 +1,16 @@
+pandoc: '3.10'
+pkgdown: 2.0.6
+pkgdown_sha: ~
+articles:
+  apexog: apexog.html
+  binary-and-interactions: binary-and-interactions.html
+  gamma-scale: gamma-scale.html
+  r-and-stata: r-and-stata.html
+  stata-help: stata-help.html
+  stata: stata.html
+  uci-ltz: uci-ltz.html
+last_built: 2026-11-08T06:16Z
+urls:
+  reference: https://jespernwulff.github.io/apexog/reference
+  article: https://jespernwulff.github.io/apexog/articles
+

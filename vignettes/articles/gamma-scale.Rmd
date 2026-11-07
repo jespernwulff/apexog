@@ -1,0 +1,125 @@
+---
+title: "Which scale for the violation?"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+A violation of the exclusion restriction is a number, *γ*, and a number needs a
+unit. In a linear model there is only one: *γ* is the direct effect of the
+instrument on the outcome. In a probit there are three natural ones, and apexog
+lets you use any of them through `gunits` (R) or `gunits()` (Stata).
+Internally the violation always enters the model the same way, as an offset
+*z'γ* in the probit index.
+
+## The three scales
+
+**The latent index** (`gunits = "latent"`, the default; synonym `"index"`).
+*γ* is a coefficient in the index of the main probit. That probit includes the
+control function, and it normalizes the variance of the error *conditional on
+the control function* to one. This is the scale of the offset itself, so no
+conversion is made. One unit of *γ* moves the probability of the outcome by
+roughly the average density of the index, m<sub>φ</sub>, per unit of the
+instrument; apexog prints m<sub>φ</sub> in the first "Scale" line.
+
+**Probability points** (`gunits = "pr"`). *γ* is the direct effect of the
+instrument on the probability that *y* = 1, per unit of the instrument (0.02
+is two percentage points). apexog divides every value you give by m<sub>φ</sub>
+from the baseline fit (a variance by m<sub>φ</sub><sup>2</sup>). This is the
+scale on which `plausexog` states the violation when it is run on a binary
+outcome, as a linear probability model, so it is the scale to use when you
+compare the two commands for the same belief. It is also the scale on which
+most people find it easiest to say how large a direct effect could plausibly
+be.
+
+**The structural latent scale** (`gunits = "structural"`). *γ* is a
+coefficient in the structural equation *y\* = x'β + dδ + z'γ + ε* with the
+*total* error variance normalized to one, the way latent-variable models are
+usually written and simulated. With an endogenous *d*, part of the error is
+explained by the control function, so the probit index measures in units of
+the smaller conditional standard deviation σ̃ = sd(ε | control function).
+apexog estimates σ̃ = (1 + b<sub>cf</sub>' Var(ĉ) b<sub>cf</sub>)<sup>−1/2</sup>
+from the baseline fit and divides every value by it; the second "Scale" line
+reports it.
+
+<div class="apx-note">
+
+The structural conversion is derived for a **linear first stage**, where the
+control function estimates the first-stage error. With a probit, fractional
+probit or Poisson first stage it does not apply: in simulations the structural
+*γ* enters the index essentially unscaled. Do not combine `gunits = "structural"`
+with those first stages; state the violation on the index or in probability
+points instead. apexog accepts the combination but prints a warning.
+
+</div>
+
+## The same belief, three ways
+
+In the example data m<sub>φ</sub> = 0.209 and σ̃ = 0.834. A direct effect of
+±0.10 on the latent index is therefore about ±0.0209 in probability and
+±0.0834 on the structural scale. Stated in those units, the three calls run
+the same grid and give the same bounds:
+
+```{r}
+library(apexog)
+data(promotion)
+f <- promoted ~ tenure + manager
+e <- training ~ subsidy
+
+index <- apexog(f, endog = e, data = promotion, gmin = -0.10, gmax = 0.10,
+                grid = 5, verbose = FALSE)
+m <- index$mphi
+s <- index$stilde
+c(m_phi = m, sigma_tilde = s)
+
+pr <- apexog(f, endog = e, data = promotion, gunits = "pr",
+             gmin = -0.10 * m, gmax = 0.10 * m, grid = 5, verbose = FALSE)
+st <- apexog(f, endog = e, data = promotion, gunits = "structural",
+             gmin = -0.10 * s, gmax = 0.10 * s, grid = 5, verbose = FALSE)
+
+rbind(index = confint(index), pr = confint(pr), structural = confint(st))
+```
+
+The grid stored in the result is always on the latent index; `grid_pr` holds
+the exact probability-scale value of each grid point:
+
+```{r}
+cbind(index$grid["g_subsidy"], index$grid_pr)
+```
+
+## Why the scale matters
+
+The conversions are not cosmetic. If you have a belief on the structural scale
+and enter it as if it were on the index, the violation you assume is too small
+by the factor σ̃. Under the local-to-zero method the interval is then too
+narrow: with a wide prior its coverage approaches 2Φ(*z* σ̃) − 1 instead of the
+nominal level (about 0.88 instead of 0.95 at an endogeneity correlation of 0.6
+in simulations). Stating the belief in probability points avoids the question
+of which latent scale is meant.
+
+## Exact probability scale
+
+The conversion `gunits = "pr"` is a first-order one: it uses m<sub>φ</sub> from
+the model with *γ* = 0. apexog also reports, at every refit, the exact
+probability-scale value of each instrument's violation in the model refitted
+at that violation:
+
+- for a 0/1 instrument, the average change in the probability of the outcome
+  when the instrument switches from 0 to 1;
+- for any other instrument, the average derivative, mean φ(η)·γ.
+
+The two agree for small violations. They can differ by several percent for a
+large violation of a 0/1 instrument when the outcome is close to 0 or 1. With
+a linear first stage, as many instruments as endogenous regressors and a
+continuous instrument they coincide exactly, as in the example above. The
+values are printed beside each range ("exact Pr scale") and stored in
+`grid_pr` (UCI) and `sims$gamma_pr` (LTZ); in Stata in `e(grid_pr)` and
+`e(gamma_pr_sim)`.
+
+## Both factors describe the baseline fit
+
+m<sub>φ</sub> and σ̃ are computed from the model with *γ* = 0. When the true
+violation is not zero that model is misspecified, so both are properties of
+that fit rather than structural constants; the conversion is exact as *γ*
+shrinks to zero.

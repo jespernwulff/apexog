@@ -1,0 +1,164 @@
+---
+title: "Get started in R"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Get started in R}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 7,
+                      fig.height = 4.5, dpi = 110)
+```
+
+This page runs a first analysis of the example data with the R package. The
+[Stata version](stata.html) runs the same analysis on the same file and prints
+the same numbers.
+
+## Install
+
+```{r, eval = FALSE}
+# install.packages("remotes")
+remotes::install_github("jespernwulff/apexog")
+```
+
+## The data and the question
+
+```{r}
+library(apexog)
+data(promotion)
+head(promotion)
+```
+
+The data are simulated (see `?promotion`). The outcome `promoted` is binary.
+Hours of `training` are endogenous: employees choose training partly on an
+unobserved ability that also drives promotion. A training `subsidy` shifts
+training and serves as the instrument; `tenure` and `manager` are controls.
+
+The instrument is only plausibly excluded. A subsidy might affect promotion
+directly, for instance by signalling that the firm values the employee. apexog
+asks how much such a direct effect, *γ*, would change the average partial
+effect (APE) of training on the probability of promotion.
+
+## A range for the violation: `uci`
+
+The formula holds the outcome and the exogenous controls; `endog` holds the
+endogenous regressor and its instrument. Here the direct effect of the subsidy
+is assumed to lie between −0.10 and 0.10 on the latent index:
+
+```{r}
+fit <- apexog(promoted ~ tenure + manager, endog = training ~ subsidy,
+              data = promotion, method = "uci",
+              gmin = -0.10, gmax = 0.10, grid = 11, verbose = FALSE)
+fit
+```
+
+The output has three parts.
+
+- **Baseline**: the APE with a valid instrument (*γ* = 0), its standard error
+  and confidence interval. With a linear first stage this is the estimate that
+  `cfprobit` followed by `margins, dydx(training)` gives in Stata. The
+  standard error is the Murphy–Topel two-step standard error, which accounts
+  for the estimated first-stage residual in the main probit.
+- **Scale**: what one unit of *γ* on the latent index means. Here it changes
+  the probability of promotion by 0.209, or 20.9 percentage points, per unit of
+  the subsidy, on average; the second line converts to the structural latent
+  scale. See
+  [Which scale for the violation?](gamma-scale.html).
+- **UCI union**: the union of the 95% confidence intervals over the eleven
+  values of *γ* in the range, and the same range expressed on the exact
+  probability scale. The APE lies between 0.097 and 0.190 for any violation in
+  the range: the effect of training stays positive.
+
+The usual extractor functions work. `coef()` and `vcov()` return the baseline
+estimate and its variance, `confint()` the bounds:
+
+```{r}
+coef(fit)
+confint(fit)
+```
+
+The estimate and confidence interval at every point of the grid are in
+`fit$grid`:
+
+```{r}
+head(fit$grid, 3)
+```
+
+`plot()` draws them. A wider range makes the point: the APE falls as the
+assumed direct effect of the subsidy grows, but within ±0.20 the lower bound
+never reaches zero.
+
+```{r, fig.alt = "APE of training and its 95% confidence band against the assumed violation"}
+wide <- apexog(promoted ~ tenure + manager, endog = training ~ subsidy,
+               data = promotion, gmin = -0.20, gmax = 0.20, grid = 21,
+               verbose = FALSE)
+plot(wide)
+```
+
+## A prior for the violation: `ltz`
+
+Instead of a hard range you can give a prior. Here *γ* is normal with mean 0
+and variance 0.0025 (standard deviation 0.05):
+
+```{r}
+ltz <- apexog(promoted ~ tenure + manager, endog = training ~ subsidy,
+              data = promotion, method = "ltz", mu = 0, omega = 0.0025,
+              iterations = 1000, seed = 101, verbose = FALSE)
+ltz
+```
+
+apexog draws *γ* 1,000 times, refits the model at every draw and adds each
+refit's sampling noise to its estimate (Conley, Hansen and Rossi 2012, eq. 7).
+The **95% CI** is the percentile interval of those draws: a confidence
+interval that accounts for both the uncertainty about *γ* and the sampling
+uncertainty. The **prior-only range** shows how far the point estimate moves
+across the prior alone; it is narrower, because it ignores sampling noise.
+`plot(ltz)` shows the distribution of the draws.
+
+R and Stata use different random-number generators, so the two LTZ intervals
+agree only up to simulation error. To reproduce a Stata run exactly, pass its
+draws, `e(gamma_sim)`, as `draws`.
+
+## The violation in probability points
+
+It is often easier to think about the direct effect of the instrument on the
+probability of the outcome than about a coefficient in the latent index. With
+`gunits = "pr"` every value of *γ* you give is read as a change in the
+probability per unit of the instrument (0.02 is 2 percentage points). Here the
+subsidy's direct effect on the probability of promotion is at most 2
+percentage points per unit:
+
+```{r}
+pr <- apexog(promoted ~ tenure + manager, endog = training ~ subsidy,
+             data = promotion, gunits = "pr",
+             gmin = -0.02, gmax = 0.02, grid = 11, verbose = FALSE)
+confint(pr)
+```
+
+apexog converts the range to the latent index (dividing by the average density
+0.209 from the baseline fit) and reports, beside it, the exact
+probability-scale value of each refit. The bounds are close to those for
+±0.10 on the latent index, because a probability change of ±0.02 is about
+±0.096 index units.
+
+## Clustered standard errors
+
+The employees work in 200 teams. `cluster` gives cluster-robust standard errors
+throughout, in the first stage, the main probit and the two-step correction:
+
+```{r}
+cl <- apexog(promoted ~ tenure + manager, endog = training ~ subsidy,
+             data = promotion, cluster = ~ team,
+             gmin = -0.10, gmax = 0.10, grid = 11, verbose = FALSE)
+confint(cl)
+```
+
+## Next steps
+
+- A binary treatment, or an interaction of an endogenous treatment with a
+  moderator: [Binary treatments and interaction effects](binary-and-interactions.html).
+- How to choose between the range and the prior, and their settings:
+  [Union of intervals or a prior?](uci-ltz.html)
+- Every argument: `?apexog`.

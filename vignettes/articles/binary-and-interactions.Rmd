@@ -1,0 +1,135 @@
+---
+title: "Binary treatments and interaction effects"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(apexog)
+```
+
+## A binary treatment
+
+When the endogenous regressor is itself 0/1, its first stage is a probit and
+the average partial effect is a discrete change: the average difference in the
+probability of the outcome with the treatment switched on and off. apexog offers
+two estimators.
+
+**Control function with a probit first stage** (`firststage = "probit"`; in
+Stata `firststage(probit)` or the `i.` prefix, `(i.certified = subsidy)`). The
+control function is the generalized residual of the first-stage probit. This is
+the estimator of Stata's `cfprobit` with a probit first stage, and apexog
+reproduces it exactly, standard error included.
+
+**Recursive bivariate probit** (`firststage = "biprobit"`). The outcome and the
+treatment are fitted jointly by maximum likelihood under bivariate normality of
+their errors, with the violation as an offset in the outcome equation. There is
+no generated regressor, so the standard errors are ordinary maximum-likelihood
+ones. The output also reports the estimated error correlation ρ.
+
+The `certification` data were simulated with jointly normal errors
+(correlation 0.5), and the true average effect of certification on the
+probability of promotion is about 0.21:
+
+```{r}
+data(certification)
+cf <- apexog(promoted ~ tenure + manager, endog = certified ~ subsidy,
+             data = certification, firststage = "probit",
+             gmin = -0.10, gmax = 0.10, grid = 11, verbose = FALSE)
+bp <- apexog(promoted ~ tenure + manager, endog = certified ~ subsidy,
+             data = certification, firststage = "biprobit",
+             gmin = -0.10, gmax = 0.10, grid = 11, verbose = FALSE)
+rbind(control_function = cbind(cf$baseline[, c("estimate", "se")], confint(cf)),
+      bivariate_probit = cbind(bp$baseline[, c("estimate", "se")], confint(bp)))
+bp$rho
+```
+
+**Which one?** The two rest on different assumptions, and neither set nests the
+other (Wooldridge 2014). The control function is consistent under Wooldridge's
+sufficiency assumption, that the outcome error depends on the instrument and
+the treatment only through the generalized residual. It is only an
+approximation when the errors are jointly normal, the model the bivariate
+probit assumes. The approximation error grows with the correlation of the
+errors. In a large simulation (*N* = 400,000, true effect 0.211) the two-step
+estimate was:
+
+| Error correlation | Control function | Bias | Bivariate probit | Bias |
+|---|---|---|---|---|
+| 0.3 | 0.205 | −2.7% | 0.211 | 0.0% |
+| 0.5 | 0.186 | −11.6% | 0.210 | −0.4% |
+| 0.8 | 0.104 | −50.6% | 0.211 | +0.1% |
+
+So when you maintain joint normality of the outcome and treatment errors, use
+the bivariate probit. apexog prints a note whenever a generalized-residual
+control function is in use. The same caveat applies to fractional
+(`"fprobit"`) and count (`"poisson"`) treatments, for which no exact
+alternative is available. The bivariate probit handles one endogenous
+regressor and the average partial effect, not interaction effects.
+
+## Interaction effects
+
+In a probit the effect of one regressor depends on the values of all others,
+so the interaction of two variables is not read off a coefficient. apexog
+targets the average interaction effect (AIE) instead, averaged over the sample
+in the style of `ginteff` (Radean 2023). Three cases, detected from the data or
+set with `aie_binary` (in Stata with the `c.` and `i.` prefixes in
+`target()`):
+
+| Interactors | AIE |
+|---|---|
+| continuous × continuous | the average cross-partial derivative of the probability |
+| continuous × binary | the change in the continuous variable's average slope when the binary one switches from 0 to 1 |
+| binary × binary | the average second difference of the probability |
+
+**Interactions of exogenous variables.** `aie = c("x", "w")` with both among
+the controls. apexog adds the product `x:w` to the model (or uses it if the
+formula already contains it, as in `x * w`).
+
+**An endogenous treatment and a moderator.** When the treatment is endogenous
+its product with a moderator is endogenous too, and needs its own instrument:
+the product of the instrument and the moderator. Declare the product as a
+second endogenous regressor and point `aie` at the pair. apexog then adds the
+product of the two control functions to the main probit (`cfprobit`'s
+`cfinteract`). In the `promotion` data training pays off more under a
+supportive manager:
+
+```{r}
+data(promotion)
+aie <- apexog(promoted ~ tenure + manager,
+              endog = training + training:manager ~ subsidy + subsidy:manager,
+              data = promotion, aie = c("training", "manager"),
+              aie_binary = c(FALSE, TRUE),
+              gmin = -0.05, gmax = 0.05, grid = 5, verbose = FALSE)
+aie
+```
+
+The violation is now allowed on both instruments, the subsidy and its product
+with `manager`, each within ±0.05. With `aie_binary = c(FALSE, TRUE)` the AIE
+is the difference in training's average slope between employees with and
+without a supportive manager: 0.051 at *γ* = 0, and between 0.018 and 0.088
+over the range. The same model in Stata:
+
+```stata
+apexog uci promoted tenure manager ///
+    (c.training c.training#c.manager = subsidy c.subsidy#i.manager), ///
+    target(c.training#i.manager) gmin(-0.05) gmax(0.05) grid(5)
+```
+
+```{.stata-output}
+Baseline (gamma = 0):
+    AIE(training ## manager) =  0.051042  (SE 0.012035)  [ 0.027455,  0.074629]
+...
+    AIE(training ## manager) bounds = [ 0.017988,  0.087635]
+```
+
+The control functions are held at their observed values when the moderator is
+switched, as in `ginteff` after the corresponding probit.
+
+## References
+
+Radean, M. (2023). ginteff: A generalized command for computing interaction
+effects. *Stata Journal*, 23(2), 301–335.
+<https://doi.org/10.1177/1536867X231175253>
+
+Wooldridge, J. M. (2014). Quasi-maximum likelihood estimation and testing for
+nonlinear models with endogenous explanatory variables. *Journal of
+Econometrics*, 182(1), 226–234. <https://doi.org/10.1016/j.jeconom.2014.04.020>

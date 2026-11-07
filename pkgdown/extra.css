@@ -1,0 +1,165 @@
+/* apexog site theme: warm paper, deep teal, rust accents. */
+
+:root {
+  --apx-teal: #0e5e5a;
+  --apx-teal-dark: #0a4744;
+  --apx-rust: #b85c2c;
+  --apx-amber: #e2a35a;
+  --apx-paper: #fbf8f2;
+  --apx-paper-2: #f3eee4;
+  --apx-rule: #e2d9c7;
+  --apx-ink: #22272b;
+  --apx-muted: #5d636a;
+}
+
+/* ---- navbar: light paper bar with a rust top rule ---- */
+.navbar {
+  background-color: var(--apx-paper-2) !important;
+  border-top: 4px solid var(--apx-rust);
+  border-bottom: 1px solid var(--apx-rule);
+}
+.navbar .navbar-brand {
+  font-family: "Fraunces", Georgia, serif;
+  font-weight: 700;
+  color: var(--apx-teal) !important;
+  letter-spacing: 0.01em;
+}
+.navbar .nav-link { color: var(--apx-ink) !important; }
+.navbar .nav-link:hover, .navbar .nav-item.active .nav-link {
+  color: var(--apx-teal) !important;
+}
+.navbar .nav-text.text-muted, .navbar .version { color: var(--apx-rust) !important; }
+.navbar .dropdown-menu { background-color: var(--apx-paper); border-color: var(--apx-rule); }
+
+/* ---- typography ---- */
+h1, h2, h3, h4 { color: var(--apx-ink); }
+.page-header h1, main h1 { font-weight: 700; }
+main h2 {
+  margin-top: 2.2rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 2px solid var(--apx-rule);
+}
+main h2::after {
+  content: "";
+  display: block;
+  width: 3rem;
+  height: 3px;
+  margin-top: 0.3rem;
+  margin-bottom: -0.55rem;
+  background: var(--apx-rust);
+}
+main h3 { margin-top: 1.6rem; }
+a { text-decoration-thickness: 1px; text-underline-offset: 2px; }
+.text-muted, .footer { color: var(--apx-muted) !important; }
+
+/* ---- code ---- */
+div.sourceCode {
+  background: transparent !important;
+  border: none !important;
+  margin: 0;
+}
+pre {
+  background-color: #f2ede3 !important;
+  border: 1px solid var(--apx-rule) !important;
+  border-left: 4px solid var(--apx-teal) !important;
+  border-radius: 0.2rem;
+  padding: 0.7rem 0.9rem;
+}
+pre code { font-size: 0.86rem; }
+:not(pre) > code {
+  background-color: #efe8da;
+  color: #7a3a17;
+  padding: 0.05rem 0.3rem;
+  border-radius: 0.15rem;
+}
+pre .co { color: #6c7a6f; font-style: italic; }
+
+/* Stata blocks and output: a rust rule instead of teal */
+pre.stata, div.stata pre, pre.stata-output { border-left-color: var(--apx-rust) !important; }
+pre.stata-output { background-color: #fbf6ec !important; font-size: 0.82rem; }
+
+/* ---- home hero ---- */
+.apx-hero {
+  margin: 0.6rem 0 2rem 0;
+  padding: 1.6rem 1.8rem 1.4rem 1.8rem;
+  background: linear-gradient(135deg, #0e5e5a 0%, #0b4a47 100%);
+  color: #f6f1e6;
+  border-radius: 0.35rem;
+  border-bottom: 5px solid var(--apx-rust);
+}
+.apx-hero .apx-kicker {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.78rem;
+  color: var(--apx-amber);
+  margin-bottom: 0.4rem;
+}
+.apx-hero .apx-question {
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 1.45rem;
+  line-height: 1.35;
+  margin-bottom: 0.8rem;
+}
+.apx-hero p { margin-bottom: 0.6rem; }
+.apx-hero a:not(.btn) { color: #f9d9a8; }
+.apx-buttons { margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.apx-buttons .btn { font-weight: 600; padding: 0.45rem 1.1rem; }
+.apx-buttons .btn-light { background-color: var(--apx-paper); color: var(--apx-teal); border: none; }
+.apx-buttons .btn-outline-light:hover { color: var(--apx-teal); }
+
+/* ---- feature cards on the home page ---- */
+.apx-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 0.9rem; margin: 1rem 0 1.5rem 0; }
+.apx-card {
+  background: #fffdf8;
+  border: 1px solid var(--apx-rule);
+  border-top: 3px solid var(--apx-teal);
+  border-radius: 0.25rem;
+  padding: 0.9rem 1rem 0.6rem 1rem;
+}
+.apx-card h4 { font-size: 1.05rem; margin: 0 0 0.35rem 0; }
+.apx-card p { font-size: 0.97rem; margin-bottom: 0.4rem; }
+.apx-card.rust { border-top-color: var(--apx-rust); }
+
+/* ---- tabs (R / Stata) ---- */
+.nav-pills .nav-link {
+  border: 1px solid var(--apx-rule);
+  margin-right: 0.35rem;
+  padding: 0.2rem 0.9rem;
+  color: var(--apx-ink);
+  background: #fffdf8;
+}
+.nav-pills .nav-link.active { background-color: var(--apx-teal); border-color: var(--apx-teal); }
+.tab-content { margin-top: 0.6rem; }
+
+/* ---- callouts ---- */
+.apx-note {
+  background: #fff7ea;
+  border: 1px solid #f0d9b5;
+  border-left: 4px solid var(--apx-amber);
+  padding: 0.7rem 1rem;
+  border-radius: 0.2rem;
+  margin: 1rem 0;
+}
+.apx-note p:last-child { margin-bottom: 0; }
+
+/* ---- tables ---- */
+/* pkgdown makes tables display:block (scrollable), so a narrow table does not
+   fill its box: colour the cells, not the table */
+main table { background: transparent; }
+main table td { background-color: #fffdf8 !important; }
+main table th { background: var(--apx-paper-2); border-bottom: 2px solid var(--apx-teal) !important; }
+
+/* ---- sidebar ---- */
+#pkgdown-sidebar h2, .sidebar h2, aside h2 {
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--apx-rust);
+  border-bottom: none;
+}
+aside h2::after, #pkgdown-sidebar h2::after { display: none; }
+
+/* ---- reference index ---- */
+.ref-index h2 { font-size: 1.3rem; }
+
+footer { border-top: 1px solid var(--apx-rule); }

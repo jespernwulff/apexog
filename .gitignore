@@ -1,0 +1,8 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+*.log
+# render leftovers of a pkgdown run (the site is in docs/)
+vignettes/*.html
+vignettes/articles/*.html

@@ -1,0 +1,112 @@
+url: https://jespernwulff.github.io/apexog/
+
+template:
+  bootstrap: 5
+  bslib:
+    bg: "#fbf8f2"
+    fg: "#22272b"
+    primary: "#0e5e5a"
+    secondary: "#b85c2c"
+    link-color: "#0b6e68"
+    base_font: {google: "Source Sans 3"}
+    heading_font: {google: "Fraunces"}
+    code_font: {google: "JetBrains Mono"}
+    font-size-base: 1.06rem
+    headings-font-weight: 600
+    border-radius: 0.2rem
+    border-radius-lg: 0.3rem
+
+home:
+  title: apexog
+  description: >
+    Sensitivity of average partial and interaction effects in binary-outcome
+    instrumental-variables models to violations of the exclusion restriction,
+    in R and Stata.
+  links:
+  - text: Stata command on GitHub
+    href: https://github.com/jespernwulff/stata-apexog
+  - text: Report a bug (Stata)
+    href: https://github.com/jespernwulff/stata-apexog/issues
+  sidebar:
+    structure: [links, license, citation, authors]
+
+navbar:
+  bg: light
+  type: light
+  structure:
+    left: [start, guides, reference, news]
+    right: [search, source]
+  components:
+    start:
+      text: Get started
+      menu:
+      - text: In R
+        href: articles/apexog.html
+      - text: In Stata
+        href: articles/stata.html
+    guides:
+      text: Guides
+      menu:
+      - text: Which scale for the violation?
+        href: articles/gamma-scale.html
+      - text: Union of intervals or a prior?
+        href: articles/uci-ltz.html
+      - text: Binary treatments and interaction effects
+        href: articles/binary-and-interactions.html
+      - text: R and Stata side by side
+        href: articles/r-and-stata.html
+    reference:
+      text: Reference
+      menu:
+      - text: R functions and data
+        href: reference/index.html
+      - text: Stata help file
+        href: articles/stata-help.html
+    news:
+      text: News
+      href: news/index.html
+    source:
+      icon: fab fa-github fa-lg
+      aria-label: Source code on GitHub
+      menu:
+      - text: R package
+        href: https://github.com/jespernwulff/apexog
+      - text: Stata command
+        href: https://github.com/jespernwulff/stata-apexog
+
+articles:
+- title: Get started
+  desc: Install apexog and run a first analysis on the example data.
+  contents:
+  - apexog
+  - articles/stata
+- title: Guides
+  desc: What the numbers mean and which options to choose.
+  contents:
+  - articles/gamma-scale
+  - articles/uci-ltz
+  - articles/binary-and-interactions
+  - articles/r-and-stata
+- title: Stata reference
+  contents:
+  - articles/stata-help
+
+reference:
+- title: Sensitivity analysis
+  contents:
+  - apexog
+- title: Working with the result
+  contents:
+  - apexog-methods
+  - summary.apexog
+  - confint.apexog
+  - plot.apexog
+- title: Example data
+  contents:
+  - promotion
+  - certification
+
+footer:
+  structure:
+    left: developed_by
+    right: built_with

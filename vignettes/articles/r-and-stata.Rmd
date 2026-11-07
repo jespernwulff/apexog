@@ -1,0 +1,81 @@
+---
+title: "R and Stata side by side"
+---
+
+The R package is a port of the Stata command. Both fit the same models with
+the same formulas, and on the same data they agree to about seven significant
+digits: the R test suite compares the two on 29 specifications, covering every
+first stage, clustering, interaction effects, the bivariate probit, the three
+scales for the violation and the local-to-zero refits at Stata's own draws.
+
+## The model
+
+| Stata | R |
+|---|---|
+| `apexog uci y x1 x2 (d = z1 z2)` | `apexog(y ~ x1 + x2, endog = d ~ z1 + z2, method = "uci", ...)` |
+| `apexog ltz ...` | `method = "ltz"` |
+| `(d1 d2 = z1 z2)`: shared instruments | `endog = d1 + d2 ~ z1 + z2` |
+| `(d1 = z1 z2) (d2 = z2 z3)`: own instruments | `endog = list(d1 ~ z1 + z2, d2 ~ z2 + z3)` |
+| `i.cat` among the controls or instruments | `factor(cat)` |
+| `(c.d c.d#c.x = z c.z#c.x)`: endogenous interaction | `endog = d + d:x ~ z + z:x` |
+| `if x > 0` | `subset = x > 0` |
+| at least one control is needed | `y ~ 1` for a model without controls |
+
+## Options and arguments
+
+| Stata option | R argument |
+|---|---|
+| `gmin()`, `gmax()`, `grid()` | `gmin`, `gmax`, `grid` |
+| `mu()`, `omega()` | `mu`, `omega` |
+| `distribution(uniform a b)` | `prior = "uniform", prior_params = list(c(a, b))` |
+| `distribution(normal m s)`, `chi2`, `t`, `gamma`, `poisson` | `prior = "normal"`, `"chi2"`, `"t"`, `"gamma"`, `"poisson"` with `prior_params` |
+| `distribution(special var)` | `prior = "special", prior_params = list(data$var)` |
+| (none) | `prior = function(n) ...`, or `draws = <matrix>` |
+| `iterations()`, `seed()` | `iterations`, `seed` |
+| `firststage(linear probit fprobit poisson biprobit)` | `firststage = "linear"`, ... (one value or one per endogenous regressor) |
+| `i.d` / `c.d` prefix in the clause | `firststage = "probit"` / `"linear"` |
+| `target(d1)` | `target = "d1"` |
+| `target(c.x#i.w)` or `aie(x w)` | `aie = c("x", "w")`, with `aie_binary = c(FALSE, TRUE)` to fix the types |
+| `cfinteract` | `cfinteract = TRUE` |
+| `gunits(latent pr structural)` | `gunits = "latent"`, `"pr"`, `"structural"` |
+| `level(95)` or `level(.95)` | `level = 0.95` or `95` |
+| `vce(robust)` (default) | (default) |
+| `vce(cluster id)` | `cluster = ~ id` |
+| `graphomega()`, `graphmu()`, `graphdelta()` | `sweep_omega`, `sweep_mu`, `sweep_delta` |
+| `graph` | `plot(fit)` |
+| `noheader` | do not print the result; `verbose = FALSE` silences the notes |
+
+## Stored results
+
+| Stata | R |
+|---|---|
+| `e(b)`, `e(V)` | `coef(fit)`, `vcov(fit)` |
+| `e(baseline_ape)`, `e(baseline_se)`, `e(baseline_lo)`, `e(baseline_hi)` | `fit$baseline` |
+| `e(lb_d)`, `e(ub_d)`; `e(lb_aie)`, `e(ub_aie)` | `confint(fit)`, `fit$bounds` |
+| `e(lo_prior_vec)`, `e(hi_prior_vec)` | `fit$prior_band` |
+| `e(grid)`, `e(grid_pr)` | `fit$grid`, `fit$grid_pr` |
+| `e(gamma_sim)`, `e(gamma_pr_sim)` | `fit$sims$gamma`, `fit$sims$gamma_pr` |
+| `e(ape_sim)`, `e(se_sim)`, `e(ape_sim_cnv)` | `fit$sims$est`, `fit$sims$se`, `fit$sims$est_cnv` |
+| `e(sweep)` | `fit$sweep` |
+| `e(mphi)`, `e(stilde)`, `e(rho)` | `fit$mphi`, `fit$stilde`, `fit$rho` |
+| `e(N)`, `e(N_clust)` | `nobs(fit)`, `fit$N_clust` |
+| `e(firststage)`, `e(estimator)`, `e(vce)`, `e(instruments)` | `fit$firststage`, `fit$estimator`, `fit$vce`, `fit$instruments` |
+| (not stored) | `fit$model`: the main equation's coefficients and their covariance at *γ* = 0 |
+
+## Where the two differ
+
+- **Random numbers.** R and Stata draw different random numbers, so their
+  local-to-zero intervals agree only up to simulation error. To reproduce a
+  Stata run exactly, pass its draws: `draws = <e(gamma_sim) as a matrix>` (in
+  latent units, the default `gunits`).
+- **No controls.** The Stata parser needs at least one exogenous control; R
+  accepts `y ~ 1`.
+- **Subsets with missing values.** Observations where the `subset` expression
+  is `NA` are dropped in R. Stata's `if` treats a missing value as larger than
+  any number and may keep them.
+- **Factor variables.** R's model matrix drops base levels itself; Stata's
+  apexog removes base levels and collinear instrument terms before fitting.
+  Both end with the same full-rank set of instruments.
+- **An interaction already in the formula.** With `aie = c("x", "w")` R uses a
+  product `x:w` that the formula already contains (as in `y ~ x * w`); in Stata
+  write the main effects only and let apexog add the product.
