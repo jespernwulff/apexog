@@ -1,5 +1,7 @@
 # apexog <img src="man/figures/logo.svg" align="right" height="138" alt="apexog logo" />
 
+[![R-CMD-check](https://github.com/jespernwulff/apexog/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/jespernwulff/apexog/actions/workflows/R-CMD-check.yaml)
+
 **Plausibly exogenous bounds for average partial effects in binary-outcome IV
 models.**
 
