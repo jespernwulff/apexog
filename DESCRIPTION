@@ -1,7 +1,7 @@
 Package: apexog
 Type: Package
 Title: Plausibly Exogenous Bounds for Average Partial Effects in Binary-Outcome IV Models
-Version: 0.20.1
+Version: 0.21.0
 Authors@R: person("Jesper N.", "Wulff", email = "jwulff@econ.au.dk",
     role = c("aut", "cre"))
 Description: Sensitivity analysis for instrumental-variables models with a

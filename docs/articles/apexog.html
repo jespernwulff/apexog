@@ -37,7 +37,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">apexog</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.20.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -164,7 +164,7 @@ and 0.10 on the latent index:</p>
 <span><span class="co">#&gt; Target:    APE of training</span></span>
 <span><span class="co">#&gt; ------------------------------------------------------------------------------</span></span>
 <span><span class="co">#&gt; Baseline (gamma = 0):</span></span>
-<span><span class="co">#&gt;     APE(training)      = 0.144457  (SE 0.008323)  [0.128145, 0.160769]</span></span>
+<span><span class="co">#&gt;     APE(training)      = 0.144457  (SE 0.008376)  [0.128040, 0.160874]</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Scale:     1 latent-index unit of gamma = 0.2091 pr. points per unit of Z (avg., baseline)</span></span>
 <span><span class="co">#&gt;            1 structural-latent unit of gamma = 1.1986 latent-index units  (sigma_tilde = 0.8343)</span></span>
@@ -172,7 +172,7 @@ and 0.10 on the latent index:</p>
 <span><span class="co">#&gt; UCI union over gamma grid (11 point(s) per instrument):</span></span>
 <span><span class="co">#&gt;     gamma_subsidy  range: [-0.1000, 0.1000]   exact Pr scale: [-0.0209, 0.0209]</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     APE(training)      bounds = [0.097219, 0.190375]</span></span>
+<span><span class="co">#&gt;     APE(training)      bounds = [0.097095, 0.190449]</span></span>
 <span><span class="co">#&gt; ------------------------------------------------------------------------------</span></span></code></pre></div>
 <p>The output has three parts.</p>
 <ul>
@@ -203,16 +203,16 @@ training stays positive.</li>
 <span><span class="co">#&gt;  training </span></span>
 <span><span class="co">#&gt; 0.1444568</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
-<span><span class="co">#&gt;              lower     upper</span></span>
-<span><span class="co">#&gt; training 0.0972193 0.1903748</span></span></code></pre></div>
+<span><span class="co">#&gt;               lower     upper</span></span>
+<span><span class="co">#&gt; training 0.09709467 0.1904491</span></span></code></pre></div>
 <p>The estimate and confidence interval at every point of the grid are
 in <code>fit$grid</code>:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">fit</span><span class="op">$</span><span class="va">grid</span>, <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   g_subsidy est_training lo_training hi_training</span></span>
-<span><span class="co">#&gt; 1     -0.10    0.1746299   0.1588850   0.1903748</span></span>
-<span><span class="co">#&gt; 2     -0.08    0.1685953   0.1527524   0.1844382</span></span>
-<span><span class="co">#&gt; 3     -0.06    0.1625607   0.1466119   0.1785094</span></span></code></pre></div>
+<span><span class="co">#&gt; 1     -0.10    0.1746299   0.1588106   0.1904491</span></span>
+<span><span class="co">#&gt; 2     -0.08    0.1685953   0.1526714   0.1845191</span></span>
+<span><span class="co">#&gt; 3     -0.06    0.1625607   0.1465245   0.1785968</span></span></code></pre></div>
 <p><code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> draws them. A wider range makes the point: the
 APE falls as the assumed direct effect of the subsidy grows, but within
 ±0.20 the lower bound never reaches zero.</p>
@@ -240,7 +240,7 @@ normal with mean 0 and variance 0.0025 (standard deviation 0.05):</p>
 <span><span class="co">#&gt; Target:    APE of training</span></span>
 <span><span class="co">#&gt; ------------------------------------------------------------------------------</span></span>
 <span><span class="co">#&gt; Baseline (gamma = 0):</span></span>
-<span><span class="co">#&gt;     APE(training)      = 0.144457  (SE 0.008323)  [0.128145, 0.160769]</span></span>
+<span><span class="co">#&gt;     APE(training)      = 0.144457  (SE 0.008376)  [0.128040, 0.160874]</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Scale:     1 latent-index unit of gamma = 0.2091 pr. points per unit of Z (avg., baseline)</span></span>
 <span><span class="co">#&gt;            1 structural-latent unit of gamma = 1.1986 latent-index units  (sigma_tilde = 0.8343)</span></span>
@@ -251,7 +251,7 @@ normal with mean 0 and variance 0.0025 (standard deviation 0.05):</p>
 <span><span class="co">#&gt;     iterations = 1000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; LTZ 95% interval (sampling noise convolved with the prior; CHR 2012 eq. 7):</span></span>
-<span><span class="co">#&gt;     APE(training)      95% CI = [0.112487, 0.177744]</span></span>
+<span><span class="co">#&gt;     APE(training)      95% CI = [0.112442, 0.177756]</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Prior-only spread of the point estimates (sensitivity band, no sampling noise):</span></span>
 <span><span class="co">#&gt;     APE(training)      95% range = [0.116818, 0.172106]</span></span>
@@ -284,7 +284,7 @@ probability of promotion is at most 2 percentage points per unit:</p>
 <span>             gmin <span class="op">=</span> <span class="op">-</span><span class="fl">0.02</span>, gmax <span class="op">=</span> <span class="fl">0.02</span>, grid <span class="op">=</span> <span class="fl">11</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">pr</span><span class="op">)</span></span>
 <span><span class="co">#&gt;              lower     upper</span></span>
-<span><span class="co">#&gt; training 0.0985624 0.1890884</span></span></code></pre></div>
+<span><span class="co">#&gt; training 0.0984383 0.1891642</span></span></code></pre></div>
 <p>apexog converts the range to the latent index (dividing by the
 average density 0.209 from the baseline fit) and reports, beside it, the
 exact probability-scale value of each refit. The bounds are close to
@@ -303,7 +303,7 @@ probit and the two-step correction:</p>
 <span>             gmin <span class="op">=</span> <span class="op">-</span><span class="fl">0.10</span>, gmax <span class="op">=</span> <span class="fl">0.10</span>, grid <span class="op">=</span> <span class="fl">11</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">cl</span><span class="op">)</span></span>
 <span><span class="co">#&gt;               lower     upper</span></span>
-<span><span class="co">#&gt; training 0.09929228 0.1885518</span></span></code></pre></div>
+<span><span class="co">#&gt; training 0.09911813 0.1886648</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="next-steps">Next steps<a class="anchor" aria-label="anchor" href="#next-steps"></a>

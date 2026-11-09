@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">apexog</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.20.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -69,6 +69,10 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.21.0" id="apexog-0210">apexog 0.21.0<a class="anchor" aria-label="anchor" href="#apexog-0210"></a></h2>
+<ul><li>The standard error of every two-step effect (APE and AIE, all first stages, <code>cfinteract</code>, cluster-robust) now adds the direct dependence of the effect on the estimated first-stage parameters through the control function: the influence function is <code>J_beta' psi_beta + J_pi' psi_pi</code>, where versions through 0.20.1 used only the first term (as does Stata’s <code>cfprobit</code> followed by <code>margins</code>). Point estimates are unchanged; standard errors move by about 1% in the validation designs, in either direction. The bivariate-probit engine is unaffected. Mirrors Stata apexog 0.21.0.</li>
+</ul></div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.20.1" id="apexog-0201">apexog 0.20.1<a class="anchor" aria-label="anchor" href="#apexog-0201"></a></h2>
 <p>First public release of the R package, a port of the Stata command <code>apexog</code> 0.20.1 that gives the same results.</p>
 <ul><li>
@@ -80,7 +84,8 @@
 <li>Example data <code>promotion</code> and <code>certification</code>, shipped also as Stata files in <code>inst/extdata</code>.</li>
 <li>Since Stata apexog 0.20.1 the standard error of an average partial effect with <code>cfinteract</code> includes the sampling variance of the control-function product terms; the R package does the same.</li>
 </ul></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

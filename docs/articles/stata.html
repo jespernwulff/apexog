@@ -37,7 +37,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">apexog</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.20.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -111,7 +111,7 @@
     
 <p>This page runs a first analysis of the example data with the Stata
 command. The <a href="apexog.html">R version</a> runs the same analysis
-on the same file. The output below comes from apexog 0.20.1 in StataNow
+on the same file. The output below comes from apexog 0.21.0 in StataNow
 19.5 (<code>data-raw/site_examples.do</code> in the R package’s
 repository).</p>
 <div class="section level2">
@@ -157,7 +157,7 @@ Endogenous: training
 Target:    APE of every endogenous regressor (default)
 ------------------------------------------------------------------------------
 Baseline (gamma = 0):
-    APE(training)              =  0.144457  (SE 0.008323)  [ 0.128145,  0.160769]
+    APE(training)              =  0.144457  (SE 0.008376)  [ 0.128040,  0.160874]
 
 Scale:     1 latent-index unit of gamma = 0.2091 pr. points per unit of Z (avg., baseline)
            1 structural-latent unit of gamma = 1.1986 latent-index units  (sigma_tilde = 0.8343)
@@ -165,7 +165,7 @@ Scale:     1 latent-index unit of gamma = 0.2091 pr. points per unit of Z (avg.,
 UCI union over gamma grid (11 point(s) per IV):
     gamma_subsidy range  : [-0.1000,  0.1000]   exact Pr scale: [-0.0209,  0.0209]
 
-    APE(training) bounds       = [ 0.097219,  0.190375]
+    APE(training) bounds       = [ 0.097095,  0.190449]
 ------------------------------------------------------------------------------</code></pre>
 <ul>
 <li>
@@ -218,7 +218,7 @@ Endogenous: training
 Target:    APE of every endogenous regressor (default)
 ------------------------------------------------------------------------------
 Baseline (gamma = 0):
-    APE(training)              =  0.144457  (SE 0.008323)
+    APE(training)              =  0.144457  (SE 0.008376)
 
 Scale:     1 latent-index unit of gamma = 0.2091 pr. points per unit of Z (avg., baseline)
            1 structural-latent unit of gamma = 1.1986 latent-index units  (sigma_tilde = 0.8343)
@@ -229,7 +229,7 @@ LTZ prior:
     iterations         = 1000
 
 LTZ 95% intervals (sampling noise convolved with prior; CHR 2012 eq. 7):
-    APE(training) 95% CI = [ 0.109198,  0.176162]
+    APE(training) 95% CI = [ 0.109099,  0.176167]
 
 Prior-only spread of the point APEs (sensitivity band, no sampling noise):
     APE(training) 95% range = [ 0.114937,  0.174157]
@@ -258,16 +258,16 @@ direct effect of at most 2 percentage points:</p>
 UCI union over gamma grid (11 point(s) per IV):
     gamma_subsidy range  : [-0.0957,  0.0957]   exact Pr scale: [-0.0200,  0.0200]
 
-    APE(training) bounds       = [ 0.098562,  0.189088]</code></pre>
+    APE(training) bounds       = [ 0.098438,  0.189164]</code></pre>
 </div>
 <div class="section level2">
 <h2 id="clustered-standard-errors">Clustered standard errors<a class="anchor" aria-label="anchor" href="#clustered-standard-errors"></a>
 </h2>
 <div class="sourceCode" id="cb12"><pre class="sourceCode stata"><code class="sourceCode stata"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>apexog uci promoted tenure manager (training = subsidy), gmin(-0.10) gmax(0.10) <span class="bn">grid</span>(11) <span class="kw">vce</span>(<span class="kw">cluster</span> team)</span></code></pre></div>
 <pre class="stata-output"><code>Baseline (gamma = 0):
-    APE(training)              =  0.144457  (SE 0.007325)  [ 0.130099,  0.158814]
+    APE(training)              =  0.144457  (SE 0.007403)  [ 0.129948,  0.158966]
 ...
-    APE(training) bounds       = [ 0.099292,  0.188552]</code></pre>
+    APE(training) bounds       = [ 0.099118,  0.188665]</code></pre>
 </div>
 <div class="section level2">
 <h2 id="next-steps">Next steps<a class="anchor" aria-label="anchor" href="#next-steps"></a>

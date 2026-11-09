@@ -37,7 +37,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">apexog</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.20.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -144,7 +144,7 @@ certification on the probability of promotion is about 0.21:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span>control_function <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">cf</span><span class="op">$</span><span class="va">baseline</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"estimate"</span>, <span class="st">"se"</span><span class="op">)</span><span class="op">]</span>, <span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">cf</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>      bivariate_probit <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">bp</span><span class="op">$</span><span class="va">baseline</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"estimate"</span>, <span class="st">"se"</span><span class="op">)</span><span class="op">]</span>, <span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">bp</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                   estimate         se      lower     upper</span></span>
-<span><span class="co">#&gt; control_function 0.1996208 0.02950268 0.02039685 0.3813464</span></span>
+<span><span class="co">#&gt; control_function 0.1996208 0.02949997 0.02038233 0.3813362</span></span>
 <span><span class="co">#&gt; bivariate_probit 0.2163519 0.02650303 0.04807266 0.3846313</span></span>
 <span><span class="va">bp</span><span class="op">$</span><span class="va">rho</span></span>
 <span><span class="co">#&gt;           </span></span>
@@ -266,7 +266,7 @@ pays off more under a supportive manager:</p>
 <span><span class="co">#&gt; Target:    Average Interaction Effect (training x manager): continuous-by-binary (first difference in manager)</span></span>
 <span><span class="co">#&gt; ------------------------------------------------------------------------------</span></span>
 <span><span class="co">#&gt; Baseline (gamma = 0):</span></span>
-<span><span class="co">#&gt;     AIE(training x manager) = 0.051042  (SE 0.012035)  [0.027455, 0.074629]</span></span>
+<span><span class="co">#&gt;     AIE(training x manager) = 0.051042  (SE 0.012024)  [0.027475, 0.074609]</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Scale:     1 latent-index unit of gamma = 0.2069 pr. points per unit of Z (avg., baseline)</span></span>
 <span><span class="co">#&gt;            1 structural-latent unit of gamma = 1.2033 latent-index units  (sigma_tilde = 0.8310)</span></span>
@@ -275,7 +275,7 @@ pays off more under a supportive manager:</p>
 <span><span class="co">#&gt;     gamma_subsidy  range: [-0.0500, 0.0500]   exact Pr scale: [-0.0103, 0.0103]</span></span>
 <span><span class="co">#&gt;     gamma_subsidy:manager range: [-0.0500, 0.0500]   exact Pr scale: [-0.0103, 0.0103]</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     AIE(training x manager) bounds = [0.017988, 0.087635]</span></span>
+<span><span class="co">#&gt;     AIE(training x manager) bounds = [0.018002, 0.087606]</span></span>
 <span><span class="co">#&gt; ------------------------------------------------------------------------------</span></span></code></pre></div>
 <p>The violation is now allowed on both instruments, the subsidy and its
 product with <code>manager</code>, each within ±0.05. With
@@ -287,9 +287,9 @@ range. The same model in Stata:</p>
 <span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>    (c.training c.training#c.manager = subsidy c.subsidy#i.manager), <span class="co">///</span></span>
 <span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>    target(c.training#i.manager) gmin(-0.05) gmax(0.05) <span class="bn">grid</span>(5)</span></code></pre></div>
 <pre class="stata-output"><code>Baseline (gamma = 0):
-    AIE(training ## manager) =  0.051042  (SE 0.012035)  [ 0.027455,  0.074629]
+    AIE(training ## manager) =  0.051042  (SE 0.012024)  [ 0.027475,  0.074609]
 ...
-    AIE(training ## manager) bounds = [ 0.017988,  0.087635]</code></pre>
+    AIE(training ## manager) bounds = [ 0.018002,  0.087606]</code></pre>
 <p>The control functions are held at their observed values when the
 moderator is switched, as in <code>ginteff</code> after the
 corresponding probit.</p>

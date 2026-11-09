@@ -18,7 +18,7 @@ the number of observations used."><meta property="og:image" content="https://jes
     
     <a class="navbar-brand me-2" href="../index.html">apexog</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.20.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -132,7 +132,7 @@ the number of observations used.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Target:    APE of training</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ------------------------------------------------------------------------------</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Baseline (gamma = 0):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     APE(training)      = 0.144457  (SE 0.008323)  [0.128145, 0.160769]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     APE(training)      = 0.144457  (SE 0.008376)  [0.128040, 0.160874]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Scale:     1 latent-index unit of gamma = 0.2091 pr. points per unit of Z (avg., baseline)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            1 structural-latent unit of gamma = 1.1986 latent-index units  (sigma_tilde = 0.8343)</span>
@@ -140,14 +140,14 @@ the number of observations used.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> UCI union over gamma grid (3 point(s) per instrument):</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     gamma_subsidy  range: [-0.1000, 0.1000]   exact Pr scale: [-0.0209, 0.0209]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     APE(training)      bounds = [0.097219, 0.190375]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     APE(training)      bounds = [0.097095, 0.190449]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ------------------------------------------------------------------------------</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  training </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 0.1444568 </span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    training </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.008322698 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.008376224 </span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/nobs.html" class="external-link">nobs</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 4000</span>
 </code></pre></div>

@@ -19,14 +19,20 @@
 #'     noise (CHR 2012, eq. 7).  The prior-only spread is reported as well.}
 #' }
 #'
-#' This is an R port of the Stata command \code{apexog} (v0.20.1); results agree
+#' This is an R port of the Stata command \code{apexog} (v0.21.0); results agree
 #' with Stata to optimizer tolerance (about 1e-7 relative on the validation
 #' specifications).  Random draws differ between R and Stata, so LTZ intervals
 #' agree only in distribution unless the same \code{draws} are supplied.
 #' Stata apexog up to v0.20.0 omitted the control-function-product
 #' coefficients from the APE standard error when \code{cfinteract} was used
 #' with an APE target (0.02\% of the SE in the validation design); v0.20.1 and
-#' this package include them.
+#' this package include them.  Since v0.21.0 (Stata and R) the standard error
+#' of every two-step effect also includes the effect's direct dependence on the
+#' estimated first-stage parameters through the control function (influence
+#' function \code{J_beta' psi_beta + J_pi' psi_pi}); earlier versions, and
+#' Stata's \code{cfprobit} followed by \code{margins}, use the first term only.
+#' Point estimates are unchanged; the difference is about 1\% of the SE in the
+#' validation designs.
 #'
 #' @param formula Two-sided formula \code{y ~ x1 + x2} with the 0/1 outcome and
 #'   the exogenous controls (factors and interactions allowed; use

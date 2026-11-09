@@ -62,7 +62,7 @@ apexog(promoted ~ tenure + manager, endog = training ~ subsidy,
 #> Target:    APE of training
 #> ------------------------------------------------------------------------------
 #> Baseline (gamma = 0):
-#>     APE(training)      = 0.144457  (SE 0.008323)  [0.128145, 0.160769]
+#>     APE(training)      = 0.144457  (SE 0.008376)  [0.128040, 0.160874]
 #>
 #> Scale:     1 latent-index unit of gamma = 0.2091 pr. points per unit of Z (avg., baseline)
 #>            1 structural-latent unit of gamma = 1.1986 latent-index units  (sigma_tilde = 0.8343)
@@ -70,7 +70,7 @@ apexog(promoted ~ tenure + manager, endog = training ~ subsidy,
 #> UCI union over gamma grid (11 point(s) per instrument):
 #>     gamma_subsidy  range: [-0.1000, 0.1000]   exact Pr scale: [-0.0209, 0.0209]
 #>
-#>     APE(training)      bounds = [0.097219, 0.190375]
+#>     APE(training)      bounds = [0.097095, 0.190449]
 #> ------------------------------------------------------------------------------
 ```
 
@@ -90,7 +90,7 @@ Endogenous: training
 Target:    APE of every endogenous regressor (default)
 ------------------------------------------------------------------------------
 Baseline (gamma = 0):
-    APE(training)              =  0.144457  (SE 0.008323)  [ 0.128145,  0.160769]
+    APE(training)              =  0.144457  (SE 0.008376)  [ 0.128040,  0.160874]
 
 Scale:     1 latent-index unit of gamma = 0.2091 pr. points per unit of Z (avg., baseline)
            1 structural-latent unit of gamma = 1.1986 latent-index units  (sigma_tilde = 0.8343)
@@ -98,7 +98,7 @@ Scale:     1 latent-index unit of gamma = 0.2091 pr. points per unit of Z (avg.,
 UCI union over gamma grid (11 point(s) per IV):
     gamma_subsidy range  : [-0.1000,  0.1000]   exact Pr scale: [-0.0209,  0.0209]
 
-    APE(training) bounds       = [ 0.097219,  0.190375]
+    APE(training) bounds       = [ 0.097095,  0.190449]
 ------------------------------------------------------------------------------
 ```
 

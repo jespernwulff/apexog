@@ -37,7 +37,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">apexog</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.20.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -186,10 +186,10 @@ the three calls run the same grid and give the same bounds:</p>
 <span>             gmin <span class="op">=</span> <span class="op">-</span><span class="fl">0.10</span> <span class="op">*</span> <span class="va">s</span>, gmax <span class="op">=</span> <span class="fl">0.10</span> <span class="op">*</span> <span class="va">s</span>, grid <span class="op">=</span> <span class="fl">5</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span>index <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">index</span><span class="op">)</span>, pr <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">pr</span><span class="op">)</span>, structural <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">st</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;              lower     upper</span></span>
-<span><span class="co">#&gt; training 0.0972193 0.1903748</span></span>
-<span><span class="co">#&gt; training 0.0972193 0.1903748</span></span>
-<span><span class="co">#&gt; training 0.0972193 0.1903748</span></span></code></pre></div>
+<span><span class="co">#&gt;               lower     upper</span></span>
+<span><span class="co">#&gt; training 0.09709467 0.1904491</span></span>
+<span><span class="co">#&gt; training 0.09709467 0.1904491</span></span>
+<span><span class="co">#&gt; training 0.09709467 0.1904491</span></span></code></pre></div>
 <p>The grid stored in the result is always on the latent index;
 <code>grid_pr</code> holds the exact probability-scale value of each
 grid point:</p>

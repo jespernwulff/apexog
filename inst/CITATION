@@ -18,6 +18,6 @@ bibentry(
   author = person("Jesper N.", "Wulff"),
   title = "apexog: Plausibly Exogenous Bounds for Average Partial Effects in Binary-Outcome IV Models",
   year = "2026",
-  note = "R package and Stata command, version 0.20.1",
+  note = "R package and Stata command, version 0.21.0",
   url = "https://jespernwulff.github.io/apexog/"
 )

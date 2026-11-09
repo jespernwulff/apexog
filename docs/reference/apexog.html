@@ -26,7 +26,7 @@ outcome index."><meta property="og:image" content="https://jespernwulff.github.i
     
     <a class="navbar-brand me-2" href="../index.html">apexog</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.20.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -309,14 +309,20 @@ variances) and store the bounds-versus-width table in <code>$sweep</code>.</p></
     noise (CHR 2012, eq. 7).  The prior-only spread is reported as well.</p></dd>
 
 
-</dl><p>This is an R port of the Stata command <code>apexog</code> (v0.20.1); results agree
+</dl><p>This is an R port of the Stata command <code>apexog</code> (v0.21.0); results agree
 with Stata to optimizer tolerance (about 1e-7 relative on the validation
 specifications).  Random draws differ between R and Stata, so LTZ intervals
 agree only in distribution unless the same <code>draws</code> are supplied.
 Stata apexog up to v0.20.0 omitted the control-function-product
 coefficients from the APE standard error when <code>cfinteract</code> was used
 with an APE target (0.02% of the SE in the validation design); v0.20.1 and
-this package include them.</p>
+this package include them.  Since v0.21.0 (Stata and R) the standard error
+of every two-step effect also includes the effect's direct dependence on the
+estimated first-stage parameters through the control function (influence
+function <code>J_beta' psi_beta + J_pi' psi_pi</code>); earlier versions, and
+Stata's <code>cfprobit</code> followed by <code>margins</code>, use the first term only.
+Point estimates are unchanged; the difference is about 1% of the SE in the
+validation designs.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -350,7 +356,7 @@ this package include them.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Target:    APE of d</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ------------------------------------------------------------------------------</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Baseline (gamma = 0):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     APE(d)             = 0.128429  (SE 0.013655)  [0.101665, 0.155193]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     APE(d)             = 0.128429  (SE 0.013711)  [0.101556, 0.155302]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Scale:     1 latent-index unit of gamma = 0.2377 pr. points per unit of Z (avg., baseline)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            1 structural-latent unit of gamma = 1.1558 latent-index units  (sigma_tilde = 0.8652)</span>
@@ -358,11 +364,11 @@ this package include them.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> UCI union over gamma grid (5 point(s) per instrument):</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     gamma_z        range: [-0.1000, 0.1000]   exact Pr scale: [-0.0238, 0.0238]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     APE(d)             bounds = [0.062029, 0.192320]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     APE(d)             bounds = [0.061910, 0.192398]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ------------------------------------------------------------------------------</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        lower     upper</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> d 0.06202931 0.1923197</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> d 0.06190973 0.1923978</span>
 <span class="r-in"><span><span class="va">fit2</span> <span class="op">&lt;-</span> <span class="fu">apexog</span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x</span>, endog <span class="op">=</span> <span class="va">d</span> <span class="op">~</span> <span class="va">z</span>, data <span class="op">=</span> <span class="va">dat</span>, method <span class="op">=</span> <span class="st">"ltz"</span>,</span></span>
 <span class="r-in"><span>               mu <span class="op">=</span> <span class="fl">0</span>, omega <span class="op">=</span> <span class="fl">0.0025</span>, iterations <span class="op">=</span> <span class="fl">100</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Running LTZ: 100 draw(s) from the gaussian prior over 1 instrument violation(s).</span>
@@ -375,7 +381,7 @@ this package include them.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Target:    APE of d</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ------------------------------------------------------------------------------</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Baseline (gamma = 0):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     APE(d)             = 0.128429  (SE 0.013655)  [0.101665, 0.155193]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     APE(d)             = 0.128429  (SE 0.013711)  [0.101556, 0.155302]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Scale:     1 latent-index unit of gamma = 0.2377 pr. points per unit of Z (avg., baseline)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            1 structural-latent unit of gamma = 1.1558 latent-index units  (sigma_tilde = 0.8652)</span>
@@ -386,7 +392,7 @@ this package include them.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     iterations = 100</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> LTZ 95% interval (sampling noise convolved with the prior; CHR 2012 eq. 7):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     APE(d)             95% CI = [0.080241, 0.164085]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     APE(d)             95% CI = [0.080154, 0.164078]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Prior-only spread of the point estimates (sensitivity band, no sampling noise):</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     APE(d)             95% range = [0.090592, 0.162915]</span>
@@ -395,7 +401,7 @@ this package include them.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Refit estimates across the draws:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                     0%     2.5%      25%      50%      75%    97.5%     100%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> d (point)     0.082544 0.094087 0.115217 0.126253 0.137872 0.160361 0.170744</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> d (convolved) 0.075137 0.080570 0.113057 0.125594 0.140027 0.163214 0.171960</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> d (convolved) 0.075071 0.080490 0.113037 0.125569 0.140057 0.163198 0.172027</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

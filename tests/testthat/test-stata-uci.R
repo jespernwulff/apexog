@@ -1,4 +1,4 @@
-# R vs Stata apexog v0.20.1, method UCI.  Tolerances are relative and sit at
+# R vs Stata apexog v0.21.0, method UCI.  Tolerances are relative and sit at
 # optimizer tolerance (Stata's ml stopping rules vs glm.fit / the Newton loop
 # here); the observed agreement is about 1e-7 or better on estimates and SEs.
 uci_tags <- c("A1", "A3", "A5", "A6", "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8",

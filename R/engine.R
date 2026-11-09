@@ -1,7 +1,7 @@
 # Control-function engine: one fit of the main probit at a given gamma-offset,
 # the Murphy-Topel two-step covariance, and the APE / AIE delta method.
 # A line-by-line port of _apexogfit + Mata _apexogfit_apese_mt (Stata apexog
-# v0.20.1).  `S` is the model setup built once by apexog().
+# v0.21.0).  `S` is the model setup built once by apexog().
 
 # --- first stages ------------------------------------------------------------
 # Returns list(chat, A): the control function (residual / generalized residual)
@@ -125,8 +125,13 @@
   Hb <- crossprod(xm * pep, xm)
   U2 <- .ginv_sym(Hb, !aliased)
 
-  # first-stage contributions (Murphy-Topel)
+  # first-stage contributions (Murphy-Topel), plus (v0.21.0) the first-stage
+  # influence functions PSI1 and the per-observation derivative of the index
+  # with respect to pi_k, d eta_i / d pi_k' = g_k,i * wd_k,i * W_k,i' (GWD),
+  # for the direct term of the target's variance
   stot <- xm * psi
+  PSI1 <- NULL
+  GWD <- NULL
   for (k in seq_len(Jn)) {
     Wk <- S$W[, S$wcols[[k]], drop = FALSE]
     chat_k <- S$CHAT[, k]
@@ -150,17 +155,25 @@
         drop(crossprod(Wk, psi * S$CHAT[, m] * wd_k))
     }
     stot <- stot + psi_pi %*% t(J2)
+    PSI1 <- cbind(PSI1, psi_pi)
+    GWD <- cbind(GWD, Wk * (g_k * wd_k))
   }
-  meat <- if (is.null(S$cluster)) crossprod(stot) else {
-    Sc <- rowsum(stot, S$cluster, reorder = FALSE)
-    crossprod(Sc)
-  }
+  meat <- .if_meat(stot, S$cluster)
   Vb <- U2 %*% meat %*% U2
+  # per-observation influence of the probit coefficients (n x nx)
+  psi2 <- stot %*% U2
+  # full influence function of a target with coefficient gradient Jb and
+  # index-shift derivative Dq (v0.21.0; Stata apexog <= 0.20.1 and
+  # cfprobit + margins use only the first term)
+  .target_if <- function(Jb, Dq) {
+    Jpi <- colMeans(GWD * Dq)
+    drop(psi2 %*% Jb + PSI1 %*% Jpi)
+  }
   z <- stats::qnorm(1 - (1 - S$level) / 2)
 
   if (!is.null(S$aie)) {
     r <- .aie_target(S, xm, b, eta, phi)
-    se2 <- drop(r$J %*% Vb %*% r$J)
+    se2 <- drop(.if_meat(.target_if(r$J, r$Dq), S$cluster))
     se <- if (se2 < 0) NA_real_ else sqrt(se2)
     out <- list(ok = TRUE, msg = "", est = r$est, se = se,
                 lo = r$est - z * se, hi = r$est + z * se,
@@ -169,6 +182,7 @@
   } else {
     est <- se <- numeric(Jn)
     Jall <- matrix(0, nx, Jn)
+    L <- matrix(0, n, Jn)
     p <- S$p
     for (t in seq_len(Jn)) {
       di <- S$d_idx[t]
@@ -184,19 +198,22 @@
         est[t] <- mean(stats::pnorm(e1) - stats::pnorm(e0))
         Jb <- colMeans(xm * dphi)
         Jb[di] <- mean(f1)
+        Dq <- dphi
       } else {
         est[t] <- mphi * bd
         Jb <- bd * colMeans(xm * (-eta * phi))
         Jb[di] <- Jb[di] + mphi
+        Dq <- -bd * eta * phi
       }
       # Jb covers every column of xmain, including the cfinteract products
       # (Stata apexog <= 0.20.0 left those entries at 0; fixed in 0.20.1).
       Jall[, t] <- Jb
-      se2 <- drop(Jb %*% Vb %*% Jb)
-      se[t] <- if (se2 < 0) NA_real_ else sqrt(se2)
+      L[, t] <- .target_if(Jb, Dq)
     }
-    Vt <- t(Jall) %*% Vb %*% Jall
+    Vt <- .if_meat(L, S$cluster)
     Vt <- (Vt + t(Vt)) / 2
+    se <- sqrt(pmax(diag(Vt), 0))
+    se[diag(Vt) < 0] <- NA_real_
     out <- list(ok = TRUE, msg = "", est = est, se = se,
                 lo = est - z * se, hi = est + z * se, vtgt = Vt,
                 mphi = mphi, stilde = stilde,
@@ -219,6 +236,7 @@
     w <- bXZ - eta * av * bv
     est <- mean(phi * w)
     Tm <- -eta * w - av * bv
+    Dq <- phi * Tm
     Jb <- colMeans(xm * (phi * Tm))
     Jb[ix] <- Jb[ix] - mean(phi * eta * bv)
     Jb[iz] <- Jb[iz] - mean(phi * eta * av)
@@ -237,6 +255,7 @@
     f0 <- stats::dnorm(e0)
     est <- mean(f1 * (bC + bXZ) - f0 * bC)
     G <- -e1 * f1 * (bC + bXZ) + e0 * f0 * bC
+    Dq <- G
     Jb <- colMeans(xm * G)
     Jb[cts_i] <- Jb[cts_i] + mean(f1) - mean(f0)
     Jb[bin_i] <- mean(-e1 * f1 * (bC + bXZ))
@@ -251,10 +270,18 @@
     f11 <- stats::dnorm(e11); f10 <- stats::dnorm(e10)
     f01 <- stats::dnorm(e01); f00 <- stats::dnorm(e00)
     Dphi <- f11 - f10 - f01 + f00
+    Dq <- Dphi
     Jb <- colMeans(xm * Dphi)
     Jb[ix] <- mean((1 - X) * (f11 - f10)) - mean(X * (f01 - f00))
     Jb[iz] <- mean((1 - Zv) * (f11 - f01)) - mean(Zv * (f10 - f00))
     Jb[ixz] <- mean(f11) - mean(XZ * Dphi)
   }
-  list(est = est, J = Jb)
+  list(est = est, J = Jb, Dq = Dq)
+}
+
+# (cluster) outer product of per-observation contributions
+.if_meat <- function(M, cluster) {
+  M <- as.matrix(M)
+  if (is.null(cluster)) return(crossprod(M))
+  crossprod(rowsum(M, cluster, reorder = FALSE))
 }

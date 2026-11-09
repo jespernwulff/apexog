@@ -37,7 +37,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">apexog</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.20.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -109,7 +109,7 @@
 
     
     
-<p>The help file of the Stata command, version 0.20.1, as Stata displays
+<p>The help file of the Stata command, version 0.21.0, as Stata displays
 it with <code>help apexog</code> (rendered to text with Stata’s
 <code>smcl2txt</code> translator).</p>
 <pre class="stata-output"><code>Title
@@ -584,7 +584,8 @@ interactors are not supported in v0.9.
 
         vce(robust) -- heteroskedasticity-consistent (default).  The
             Murphy-Topel correction is applied to account for the generated
-            regressor.
+            regressor, and the effect's direct dependence on the first-stage
+            estimate is included (see Methods and formulas).
 
         vce(cluster clustvar) -- cluster-robust on clustvar, which may be
             numeric or string; the usual abbreviations such as vce(cl id) are
@@ -936,6 +937,36 @@ Methods and formulas
     cross-Hessian d(s_main)/dpi, and psi_pi_i is the first-stage influence
     function.  The cross-Hessian propagates the uncertainty in the
     first-stage parameters into beta's variance.
+
+    The variance of the effect (version 0.21.0).  The APE or AIE depends on
+    the first-stage estimate twice: through the probit coefficients (the
+    Murphy-Topel channel above) and directly, because the control function
+    chat_i(pi_hat) sits in the index at which the effect is evaluated.  Its
+    influence function therefore has two terms,
+
+        l_i = J_beta' psi_beta_i + J_pi' psi_pi_i, psi_beta_i = H_beta^(-1)
+        s_total_i
+
+        J_pi = mean_i [ dq_i/d(eta_i) * d(eta_i)/d(chat_i) * d(chat_i)/d(pi)
+        ]
+
+    where J_beta is the delta-method gradient of the effect in the probit
+    coefficients and J_pi its direct gradient in the first-stage parameters
+    (d(eta)/d(chat) = the control-function coefficient, plus the cfinteract
+    product terms).  SE = sqrt(sum_i l_i^2), with l_i summed within clusters
+    under vce(cluster); e(V) is the same outer product for all targets.
+    Versions through 0.20.1 used only the first term, SE = sqrt(J_beta'
+    V_beta_MT J_beta), as does cfprobit followed by margins (which treats the
+    stored control function as a fixed regressor); so at gamma = 0 apexog's
+    SE now differs from that benchmark by the second term, about 1% of the SE
+    in the validation designs (up to 3% under strong endogeneity), in either
+    direction.  Point estimates are unchanged.  The two-term formula was
+    checked against a formula-free oracle: with one instrument and a linear
+    first stage the fitted probit index does not depend on pi_hat, so the APE
+    equals mean(phi) * (b_d + b_z/pi_z) from a plain probit of y on the
+    controls, d and z, whose stacked delta-method variance the two-term
+    formula reproduces to machine precision.  firststage(biprobit) is a joint
+    MLE and is not affected.
 
     For cluster-robust SEs, the meat is replaced by the sum of OUTER products
     of cluster-summed scores:

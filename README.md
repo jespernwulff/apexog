@@ -40,12 +40,12 @@ data(promotion)
 apexog(promoted ~ tenure + manager, endog = training ~ subsidy,
        data = promotion, method = "uci", gmin = -0.10, gmax = 0.10, grid = 11)
 #> Baseline (gamma = 0):
-#>     APE(training)      = 0.144457  (SE 0.008323)  [0.128145, 0.160769]
+#>     APE(training)      = 0.144457  (SE 0.008376)  [0.128040, 0.160874]
 #> ...
 #> UCI union over gamma grid (11 point(s) per instrument):
 #>     gamma_subsidy  range: [-0.1000, 0.1000]   exact Pr scale: [-0.0209, 0.0209]
 #>
-#>     APE(training)      bounds = [0.097219, 0.190375]
+#>     APE(training)      bounds = [0.097095, 0.190449]
 ```
 
 Training is endogenous and a training subsidy is the instrument. If the

@@ -4,7 +4,7 @@ title: "Get started in Stata"
 
 This page runs a first analysis of the example data with the Stata command.
 The [R version](apexog.html) runs the same analysis on the same file. The
-output below comes from apexog 0.20.1 in StataNow 19.5
+output below comes from apexog 0.21.0 in StataNow 19.5
 (`data-raw/site_examples.do` in the R package's repository).
 
 ## Install
@@ -54,7 +54,7 @@ Endogenous: training
 Target:    APE of every endogenous regressor (default)
 ------------------------------------------------------------------------------
 Baseline (gamma = 0):
-    APE(training)              =  0.144457  (SE 0.008323)  [ 0.128145,  0.160769]
+    APE(training)              =  0.144457  (SE 0.008376)  [ 0.128040,  0.160874]
 
 Scale:     1 latent-index unit of gamma = 0.2091 pr. points per unit of Z (avg., baseline)
            1 structural-latent unit of gamma = 1.1986 latent-index units  (sigma_tilde = 0.8343)
@@ -62,7 +62,7 @@ Scale:     1 latent-index unit of gamma = 0.2091 pr. points per unit of Z (avg.,
 UCI union over gamma grid (11 point(s) per IV):
     gamma_subsidy range  : [-0.1000,  0.1000]   exact Pr scale: [-0.0209,  0.0209]
 
-    APE(training) bounds       = [ 0.097219,  0.190375]
+    APE(training) bounds       = [ 0.097095,  0.190449]
 ------------------------------------------------------------------------------
 ```
 
@@ -119,7 +119,7 @@ Endogenous: training
 Target:    APE of every endogenous regressor (default)
 ------------------------------------------------------------------------------
 Baseline (gamma = 0):
-    APE(training)              =  0.144457  (SE 0.008323)
+    APE(training)              =  0.144457  (SE 0.008376)
 
 Scale:     1 latent-index unit of gamma = 0.2091 pr. points per unit of Z (avg., baseline)
            1 structural-latent unit of gamma = 1.1986 latent-index units  (sigma_tilde = 0.8343)
@@ -130,7 +130,7 @@ LTZ prior:
     iterations         = 1000
 
 LTZ 95% intervals (sampling noise convolved with prior; CHR 2012 eq. 7):
-    APE(training) 95% CI = [ 0.109198,  0.176162]
+    APE(training) 95% CI = [ 0.109099,  0.176167]
 
 Prior-only spread of the point APEs (sensitivity band, no sampling noise):
     APE(training) 95% range = [ 0.114937,  0.174157]
@@ -163,7 +163,7 @@ Scale:     1 latent-index unit of gamma = 0.2091 pr. points per unit of Z (avg.,
 UCI union over gamma grid (11 point(s) per IV):
     gamma_subsidy range  : [-0.0957,  0.0957]   exact Pr scale: [-0.0200,  0.0200]
 
-    APE(training) bounds       = [ 0.098562,  0.189088]
+    APE(training) bounds       = [ 0.098438,  0.189164]
 ```
 
 ## Clustered standard errors
@@ -174,9 +174,9 @@ apexog uci promoted tenure manager (training = subsidy), gmin(-0.10) gmax(0.10) 
 
 ```{.stata-output}
 Baseline (gamma = 0):
-    APE(training)              =  0.144457  (SE 0.007325)  [ 0.130099,  0.158814]
+    APE(training)              =  0.144457  (SE 0.007403)  [ 0.129948,  0.158966]
 ...
-    APE(training) bounds       = [ 0.099292,  0.188552]
+    APE(training) bounds       = [ 0.099118,  0.188665]
 ```
 
 ## Next steps

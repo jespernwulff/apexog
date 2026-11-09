@@ -116,9 +116,9 @@ apexog uci promoted tenure manager ///
 
 ```{.stata-output}
 Baseline (gamma = 0):
-    AIE(training ## manager) =  0.051042  (SE 0.012035)  [ 0.027455,  0.074629]
+    AIE(training ## manager) =  0.051042  (SE 0.012024)  [ 0.027475,  0.074609]
 ...
-    AIE(training ## manager) bounds = [ 0.017988,  0.087635]
+    AIE(training ## manager) bounds = [ 0.018002,  0.087606]
 ```
 
 The control functions are held at their observed values when the moderator is

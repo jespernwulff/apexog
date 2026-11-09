@@ -37,7 +37,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">apexog</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.20.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -133,8 +133,8 @@ one-sided range:</p>
 <code class="sourceCode R"><span><span class="va">one</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/apexog.html">apexog</a></span><span class="op">(</span><span class="va">f</span>, endog <span class="op">=</span> <span class="va">e</span>, data <span class="op">=</span> <span class="va">promotion</span>, gmin <span class="op">=</span> <span class="fl">0</span>, gmax <span class="op">=</span> <span class="fl">0.10</span>,</span>
 <span>              grid <span class="op">=</span> <span class="fl">6</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">one</span><span class="op">)</span></span>
-<span><span class="co">#&gt;              lower    upper</span></span>
-<span><span class="co">#&gt; training 0.0972193 0.160769</span></span></code></pre></div>
+<span><span class="co">#&gt;               lower     upper</span></span>
+<span><span class="co">#&gt; training 0.09709467 0.1608739</span></span></code></pre></div>
 <p><strong>The grid.</strong> The union is taken over the grid points,
 so the grid should be fine enough to follow the estimate. The APE
 usually moves smoothly and monotonically with <em>γ</em>, and then the
@@ -170,7 +170,7 @@ sampling noise, and shrinks to a single point.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span>interval <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">ltz</span><span class="op">$</span><span class="va">bounds</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"lower"</span>, <span class="st">"upper"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span>,</span>
 <span>      prior_only <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">ltz</span><span class="op">$</span><span class="va">prior_band</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"lower"</span>, <span class="st">"upper"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                lower     upper</span></span>
-<span><span class="co">#&gt; interval   0.1124868 0.1777440</span></span>
+<span><span class="co">#&gt; interval   0.1124416 0.1777557</span></span>
 <span><span class="co">#&gt; prior_only 0.1168178 0.1721057</span></span></code></pre></div>
 <p><strong>The prior.</strong> A normal prior takes <code>mu</code> and
 <code>omega</code> (a variance), one per instrument or one for all.
@@ -209,11 +209,11 @@ draws the bounds against the prior width:</p>
 <span>             verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">sw</span><span class="op">$</span><span class="va">sweep</span></span>
 <span><span class="co">#&gt;      delta mu      lower     upper lower_prior upper_prior</span></span>
-<span><span class="co">#&gt; 1 0.000001  0 0.13024988 0.1607299  0.14379175   0.1449264</span></span>
-<span><span class="co">#&gt; 2 0.000400  0 0.12733164 0.1632267  0.13236471   0.1562672</span></span>
-<span><span class="co">#&gt; 3 0.002500  0 0.10845487 0.1831254  0.11537630   0.1749523</span></span>
-<span><span class="co">#&gt; 4 0.006400  0 0.09764762 0.1907267  0.10200825   0.1886663</span></span>
-<span><span class="co">#&gt; 5 0.012100  0 0.07485533 0.2073696  0.07796171   0.2074930</span></span>
+<span><span class="co">#&gt; 1 0.000001  0 0.13015849 0.1608360  0.14379175   0.1449264</span></span>
+<span><span class="co">#&gt; 2 0.000400  0 0.12727841 0.1633372  0.13236471   0.1562672</span></span>
+<span><span class="co">#&gt; 3 0.002500  0 0.10840441 0.1831360  0.11537630   0.1749523</span></span>
+<span><span class="co">#&gt; 4 0.006400  0 0.09749183 0.1907676  0.10200825   0.1886663</span></span>
+<span><span class="co">#&gt; 5 0.012100  0 0.07481864 0.2073640  0.07796171   0.2074930</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">sw</span><span class="op">)</span></span></code></pre></div>
 <p><img src="uci-ltz_files/figure-html/unnamed-chunk-5-1.png" alt="LTZ interval and prior-only range against the prior variance" width="770"></p>
 <p>At a prior variance near zero the interval is the ordinary confidence

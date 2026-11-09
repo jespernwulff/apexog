@@ -98,50 +98,171 @@ test_that("no controls, factors in instruments, and methods work", {
   expect_silent(plot(f))
 })
 
-test_that("APE SEs with cfinteract equal the delta method with a numerical gradient", {
-  # Rebuild the main-equation design by hand, differentiate the APE
-  # numerically in the coefficients, and sandwich with the stored
-  # Murphy-Topel covariance: this checks every Jacobian entry, including the
-  # control-function-product ones (zero in Stata apexog <= 0.20.0).
-  numgrad <- function(fn, b) {
-    vapply(seq_along(b), function(j) {
-      h <- 1e-6 * max(1, abs(b[j]))
-      bp <- b; bp[j] <- bp[j] + h
-      bm <- b; bm[j] <- bm[j] - h
-      (fn(bp) - fn(bm)) / (2 * h)
-    }, numeric(1))
+test_that("effect SEs equal the full two-step influence-function variance, all derivatives numerical", {
+  # Stack the first-stage and probit scores into one M-estimator in
+  # theta = (b, pi_1, pi_2), take its influence functions psi_i = H^{-1} s_i
+  # with H = -dS/dtheta' by central differences, differentiate the effect
+  # q(theta) numerically in ALL of theta (probit coefficients AND first-stage
+  # parameters), and form sqrt(sum_i (psi_i' J)^2).  This checks the
+  # Murphy-Topel channel and the direct first-stage channel together
+  # (apexog <= 0.20.1 omitted the latter) without using any analytic
+  # derivative of the package.
+  numjac <- function(fn, th) {
+    f0 <- fn(th)
+    out <- matrix(0, length(f0), length(th))
+    for (j in seq_along(th)) {
+      h <- 1e-6 * max(1, abs(th[j]))
+      tp <- th; tp[j] <- tp[j] + h
+      tm <- th; tm[j] <- tm[j] - h
+      out[, j] <- (fn(tp) - fn(tm)) / (2 * h)
+    }
+    out
   }
-  # (i) two continuous endogenous regressors (fixture B6)
+  full_if_se <- function(score_fn, q_fn, theta, cluster = NULL) {
+    S <- function(th) colSums(score_fn(th))
+    H <- -numjac(S, theta)
+    psi <- score_fn(theta) %*% t(solve(H))
+    J <- drop(numjac(q_fn, theta))
+    l <- drop(psi %*% J)
+    if (!is.null(cluster)) l <- rowsum(l, cluster)
+    sqrt(sum(l^2))
+  }
+  probit_psi <- function(eta, y)
+    (y - stats::pnorm(eta)) * stats::dnorm(eta) / (stats::pnorm(eta) * stats::pnorm(-eta))
+
+  # (i) two continuous endogenous regressors, linear first stages, cfinteract (B6)
   f <- fx_calls$B6()
   W <- cbind(fxdat$z1, fxdat$z2, fxdat$zb, fxdat$x1, 1)
-  c1 <- stats::lm.fit(W, fxdat$d)$residuals
-  c2 <- stats::lm.fit(W, fxdat$d2)$residuals
-  xm <- cbind(fxdat$x1, fxdat$d, fxdat$d2, c1, c2, c1 * c2, 1)
-  b <- f$model$coefficients
-  expect_equal(names(b), c("x1", "d", "d2", "cf_d", "cf_d2", "cf_d*cf_d2", "(Intercept)"))
-  for (t in 1:2) {
-    ape <- function(bb) unname(mean(stats::dnorm(drop(xm %*% bb))) * bb[1 + t])
-    expect_equal(ape(b), f$baseline$estimate[t], tolerance = 1e-10)
-    J <- numgrad(ape, b)
-    expect_equal(sqrt(drop(J %*% f$model$vcov %*% J)), f$baseline$se[t], tolerance = 1e-6)
+  pi1 <- unname(stats::lm.fit(W, fxdat$d)$coefficients)
+  pi2 <- unname(stats::lm.fit(W, fxdat$d2)$coefficients)
+  b <- unname(f$model$coefficients)
+  expect_equal(names(f$model$coefficients),
+               c("x1", "d", "d2", "cf_d", "cf_d2", "cf_d*cf_d2", "(Intercept)"))
+  nb <- length(b); np <- ncol(W)
+  design <- function(th) {
+    c1 <- fxdat$d - drop(W %*% th[nb + 1:np])
+    c2 <- fxdat$d2 - drop(W %*% th[nb + np + 1:np])
+    cbind(fxdat$x1, fxdat$d, fxdat$d2, c1, c2, c1 * c2, 1)
   }
-  # (ii) a 0/1 regressor with a probit first stage (discrete-change APE)
+  score <- function(th) {
+    xm <- design(th)
+    cbind(xm * probit_psi(drop(xm %*% th[1:nb]), fxdat$ym2),
+          W * (fxdat$d - drop(W %*% th[nb + 1:np])),
+          W * (fxdat$d2 - drop(W %*% th[nb + np + 1:np])))
+  }
+  theta <- c(b, pi1, pi2)
+  expect_lt(max(abs(colSums(score(theta)))), 1e-4)
+  for (t in 1:2) {
+    q <- function(th) mean(stats::dnorm(drop(design(th) %*% th[1:nb]))) * th[1 + t]
+    expect_equal(q(theta), f$baseline$estimate[t], tolerance = 1e-10)
+    expect_equal(full_if_se(score, q, theta), f$baseline$se[t], tolerance = 1e-5)
+  }
+
+  # (ii) a 0/1 regressor with a probit first stage + a continuous one (B8):
+  #      generalized-residual control, cfinteract, discrete-change APE
   g <- fx_calls$B8()
   W1 <- cbind(fxdat$z1, fxdat$zb, fxdat$x1, 1)
+  W2 <- cbind(fxdat$z2, fxdat$zb, fxdat$x1, 1)
   fs <- stats::glm.fit(W1, fxdat$db, family = stats::binomial(link = "probit"))
-  wpi <- fs$linear.predictors
-  g1 <- (fxdat$db - stats::pnorm(wpi)) * stats::dnorm(wpi) /
-    (stats::pnorm(wpi) * stats::pnorm(-wpi))
-  g2 <- stats::lm.fit(cbind(fxdat$z2, fxdat$zb, fxdat$x1, 1), fxdat$d2)$residuals
-  xm <- cbind(fxdat$x1, fxdat$db, fxdat$d2, g1, g2, g1 * g2, 1)
-  b <- g$model$coefficients
-  dc <- function(bb) {
-    eta <- drop(xm %*% bb)
-    unname(mean(stats::pnorm(eta + bb[2] * (1 - fxdat$db)) - stats::pnorm(eta - bb[2] * fxdat$db)))
+  pi1 <- unname(fs$coefficients)
+  pi2 <- unname(stats::lm.fit(W2, fxdat$d2)$coefficients)
+  b <- unname(g$model$coefficients); nb <- length(b); n1 <- ncol(W1); n2 <- ncol(W2)
+  gres <- function(wpi)
+    (fxdat$db - stats::pnorm(wpi)) * stats::dnorm(wpi) / (stats::pnorm(wpi) * stats::pnorm(-wpi))
+  design <- function(th) {
+    g1 <- gres(drop(W1 %*% th[nb + 1:n1]))
+    g2 <- fxdat$d2 - drop(W2 %*% th[nb + n1 + 1:n2])
+    cbind(fxdat$x1, fxdat$db, fxdat$d2, g1, g2, g1 * g2, 1)
   }
-  expect_equal(dc(b), g$baseline$estimate[1], tolerance = 1e-8)
-  J <- numgrad(dc, b)
-  expect_equal(sqrt(drop(J %*% g$model$vcov %*% J)), g$baseline$se[1], tolerance = 1e-6)
+  score <- function(th) {
+    xm <- design(th)
+    cbind(xm * probit_psi(drop(xm %*% th[1:nb]), fxdat$ym),
+          W1 * gres(drop(W1 %*% th[nb + 1:n1])),
+          W2 * (fxdat$d2 - drop(W2 %*% th[nb + n1 + 1:n2])))
+  }
+  theta <- c(b, pi1, pi2)
+  expect_lt(max(abs(colSums(score(theta)))), 1e-4)
+  q <- function(th) {
+    xm <- design(th); eta <- drop(xm %*% th[1:nb])
+    mean(stats::pnorm(eta + th[2] * (1 - fxdat$db)) - stats::pnorm(eta - th[2] * fxdat$db))
+  }
+  expect_equal(q(theta), g$baseline$estimate[1], tolerance = 1e-8)
+  expect_equal(full_if_se(score, q, theta), g$baseline$se[1], tolerance = 1e-5)
+
+  # (iii) an exogenous continuous-by-continuous AIE (C1): the first stage
+  #       includes the product control, as apexog's does
+  a <- fx_calls$C1()
+  expect_equal(names(a$model$coefficients),
+               c("x1", "x3", "x1:x3", "d", "cf_d", "(Intercept)"))
+  W <- cbind(fxdat$z1, fxdat$x1, fxdat$x3, fxdat$x1 * fxdat$x3, 1)
+  pi1 <- unname(stats::lm.fit(W, fxdat$d)$coefficients)
+  b <- unname(a$model$coefficients); nb <- length(b); np <- ncol(W)
+  design <- function(th)
+    cbind(fxdat$x1, fxdat$x3, fxdat$x1 * fxdat$x3, fxdat$d,
+          fxdat$d - drop(W %*% th[nb + 1:np]), 1)
+  score <- function(th) {
+    xm <- design(th)
+    cbind(xm * probit_psi(drop(xm %*% th[1:nb]), fxdat$yx),
+          W * (fxdat$d - drop(W %*% th[nb + 1:np])))
+  }
+  theta <- c(b, pi1)
+  expect_lt(max(abs(colSums(score(theta)))), 1e-4)
+  q <- function(th) {
+    eta <- drop(design(th) %*% th[1:nb])
+    av <- th[1] + th[3] * fxdat$x3
+    bv <- th[2] + th[3] * fxdat$x1
+    mean(stats::dnorm(eta) * (th[3] - eta * av * bv))
+  }
+  expect_equal(q(theta), a$baseline$estimate[1], tolerance = 1e-10)
+  expect_equal(full_if_se(score, q, theta), a$baseline$se[1], tolerance = 1e-5)
+
+  # (iv) a binary-by-continuous AIE with the continuous interactor endogenous
+  #      (C3b): the product column is excluded from the first stage
+  cb <- fx_calls$C3b()
+  expect_equal(names(cb$model$coefficients),
+               c("x1", "x2", "x2:d", "d", "cf_d", "(Intercept)"))
+  W <- cbind(fxdat$z1, fxdat$x1, fxdat$x2, 1)
+  pi1 <- unname(stats::lm.fit(W, fxdat$d)$coefficients)
+  b <- unname(cb$model$coefficients); nb <- length(b); np <- ncol(W)
+  design <- function(th)
+    cbind(fxdat$x1, fxdat$x2, fxdat$x2 * fxdat$d, fxdat$d,
+          fxdat$d - drop(W %*% th[nb + 1:np]), 1)
+  score <- function(th) {
+    xm <- design(th)
+    cbind(xm * probit_psi(drop(xm %*% th[1:nb]), fxdat$yi),
+          W * (fxdat$d - drop(W %*% th[nb + 1:np])))
+  }
+  theta <- c(b, pi1)
+  expect_lt(max(abs(colSums(score(theta)))), 1e-4)
+  q <- function(th) {           # derivative in d, differenced across the 0/1 x2
+    eta <- drop(design(th) %*% th[1:nb])
+    pen <- th[2] + th[3] * fxdat$d
+    e1 <- eta + (1 - fxdat$x2) * pen
+    e0 <- eta - fxdat$x2 * pen
+    mean(stats::dnorm(e1) * (th[4] + th[3]) - stats::dnorm(e0) * th[4])
+  }
+  expect_equal(q(theta), cb$baseline$estimate[1], tolerance = 1e-10)
+  expect_equal(full_if_se(score, q, theta), cb$baseline$se[1], tolerance = 1e-5)
+
+  # (v) cluster-robust: the influence functions are summed within clusters (B5)
+  b5 <- fx_calls$B5()
+  expect_equal(names(b5$model$coefficients), c("x1", "x2", "d", "cf_d", "(Intercept)"))
+  W <- cbind(fxdat$z1, fxdat$x1, fxdat$x2, 1)
+  pi1 <- unname(stats::lm.fit(W, fxdat$d)$coefficients)
+  b <- unname(b5$model$coefficients); nb <- length(b); np <- ncol(W)
+  design <- function(th)
+    cbind(fxdat$x1, fxdat$x2, fxdat$d, fxdat$d - drop(W %*% th[nb + 1:np]), 1)
+  score <- function(th) {
+    xm <- design(th)
+    cbind(xm * probit_psi(drop(xm %*% th[1:nb]), fxdat$y),
+          W * (fxdat$d - drop(W %*% th[nb + 1:np])))
+  }
+  theta <- c(b, pi1)
+  q <- function(th) mean(stats::dnorm(drop(design(th) %*% th[1:nb]))) * th[3]
+  expect_equal(q(theta), b5$baseline$estimate[1], tolerance = 1e-10)
+  expect_equal(full_if_se(score, q, theta, cluster = fxdat$team), b5$baseline$se[1],
+               tolerance = 1e-5)
+  expect_gt(abs(full_if_se(score, q, theta) / b5$baseline$se[1] - 1), 1e-3)
 })
 
 test_that("an AIE product written x1*x3 in the formula is reused, not duplicated", {
