@@ -265,6 +265,88 @@ test_that("effect SEs equal the full two-step influence-function variance, all d
   expect_gt(abs(full_if_se(score, q, theta) / b5$baseline$se[1] - 1), 1e-3)
 })
 
+test_that("fractional-probit and Poisson first stages: effect SEs equal the numerical two-step variance", {
+  # Same construction as above (stacked first-stage and probit scores, every
+  # derivative by central differences), for the two generalized-residual first
+  # stages it did not cover.  For a fractional regressor the derivative of the
+  # generalized residual is NOT the binary-probit identity chat * (wpi + chat)
+  # (apexog <= 0.21.0 used it for "fprobit"); this test fails with that weight.
+  numjac <- function(fn, th) {
+    f0 <- fn(th)
+    out <- matrix(0, length(f0), length(th))
+    for (j in seq_along(th)) {
+      h <- 1e-6 * max(1, abs(th[j]))
+      tp <- th; tp[j] <- tp[j] + h
+      tm <- th; tm[j] <- tm[j] - h
+      out[, j] <- (fn(tp) - fn(tm)) / (2 * h)
+    }
+    out
+  }
+  full_if_se <- function(score_fn, q_fn, theta) {
+    H <- -numjac(function(th) colSums(score_fn(th)), theta)
+    psi <- score_fn(theta) %*% t(solve(H))
+    sqrt(sum(drop(psi %*% drop(numjac(q_fn, theta)))^2))
+  }
+  probit_psi <- function(eta, y)
+    (y - stats::pnorm(eta)) * stats::dnorm(eta) / (stats::pnorm(eta) * stats::pnorm(-eta))
+  W <- cbind(fxdat$z1, fxdat$x1, 1)
+  np <- ncol(W)
+
+  # (i) fractional probit (B2)
+  f <- fx_calls$B2()
+  expect_equal(names(f$model$coefficients), c("x1", "df", "cf_df", "(Intercept)"))
+  pi1 <- unname(suppressWarnings(stats::glm.fit(W, fxdat$df,
+    family = stats::quasibinomial(link = "probit"),
+    control = list(epsilon = 1e-12, maxit = 100))$coefficients))
+  b <- unname(f$model$coefficients); nb <- length(b)
+  gres <- function(wpi)
+    (fxdat$df - stats::pnorm(wpi)) * stats::dnorm(wpi) / (stats::pnorm(wpi) * stats::pnorm(-wpi))
+  design <- function(th) cbind(fxdat$x1, fxdat$df, gres(drop(W %*% th[nb + 1:np])), 1)
+  score <- function(th) {
+    xm <- design(th)
+    cbind(xm * probit_psi(drop(xm %*% th[1:nb]), fxdat$yf), W * gres(drop(W %*% th[nb + 1:np])))
+  }
+  theta <- c(b, pi1)
+  expect_lt(max(abs(colSums(score(theta)))), 1e-4)
+  q <- function(th) mean(stats::dnorm(drop(design(th) %*% th[1:nb]))) * th[2]
+  expect_equal(q(theta), f$baseline$estimate[1], tolerance = 1e-10)
+  expect_equal(full_if_se(score, q, theta), f$baseline$se[1], tolerance = 1e-5)
+  # the binary-probit weight gives a visibly different first-stage Hessian here
+  wpi <- drop(W %*% pi1)
+  lam <- stats::dnorm(wpi) / (stats::pnorm(wpi) * stats::pnorm(-wpi))
+  A_bin <- gres(wpi) * (wpi + gres(wpi))
+  A_frac <- A_bin + fxdat$df * (1 - fxdat$df) * lam^2
+  H_num <- -numjac(function(p) colSums(W * gres(drop(W %*% p))), pi1)
+  expect_equal(crossprod(W * A_frac, W), H_num, tolerance = 1e-6, ignore_attr = TRUE)
+  expect_gt(max(abs(crossprod(W * A_bin, W) / H_num - 1)), 0.1)
+
+  # (ii) Poisson (B3)
+  f <- fx_calls$B3()
+  expect_equal(names(f$model$coefficients), c("x1", "dc", "cf_dc", "(Intercept)"))
+  pi1 <- unname(stats::glm.fit(W, fxdat$dc, family = stats::poisson(),
+    control = list(epsilon = 1e-12, maxit = 100))$coefficients)
+  b <- unname(f$model$coefficients); nb <- length(b)
+  design <- function(th) cbind(fxdat$x1, fxdat$dc, fxdat$dc - exp(drop(W %*% th[nb + 1:np])), 1)
+  score <- function(th) {
+    xm <- design(th)
+    cbind(xm * probit_psi(drop(xm %*% th[1:nb]), fxdat$yc),
+          W * (fxdat$dc - exp(drop(W %*% th[nb + 1:np]))))
+  }
+  theta <- c(b, pi1)
+  expect_lt(max(abs(colSums(score(theta)))), 1e-4)
+  q <- function(th) mean(stats::dnorm(drop(design(th) %*% th[1:nb]))) * th[2]
+  expect_equal(q(theta), f$baseline$estimate[1], tolerance = 1e-10)
+  expect_equal(full_if_se(score, q, theta), f$baseline$se[1], tolerance = 1e-5)
+})
+
+test_that("a fractional-probit first stage on a 0/1 regressor reproduces the probit first stage", {
+  a <- fx_calls$B1()
+  b <- apexog(yb ~ x1 + x2, endog = db ~ z1 + zb, data = fxdat, firststage = "fprobit",
+              gmin = -0.1, gmax = 0.1, grid = 3, verbose = FALSE)
+  expect_equal(b$baseline$estimate, a$baseline$estimate, tolerance = 1e-8)
+  expect_equal(b$baseline$se, a$baseline$se, tolerance = 1e-8)
+})
+
 test_that("an AIE product written x1*x3 in the formula is reused, not duplicated", {
   a <- apexog(yx ~ x1 + x3, endog = d ~ z1, data = fxdat, aie = c("x1", "x3"),
               gmin = 0, gmax = 0, grid = 2, verbose = FALSE)

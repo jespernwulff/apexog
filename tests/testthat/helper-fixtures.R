@@ -1,5 +1,5 @@
 # Stata reference results (data-raw/stata_fixtures.do, apexog
-# v0.21.0, StataNow 19.5), converted by data-raw/make_fixtures.R.
+# v0.21.1, StataNow 19.5), converted by data-raw/make_fixtures.R.
 fx <- readRDS(test_path("fixtures", "stata_fixtures.rds"))
 fxdat <- fx$data
 

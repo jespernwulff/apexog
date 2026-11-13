@@ -16,7 +16,7 @@
 * https://github.com/jespernwulff/stata-apexog).  Run in Stata from the root of
 * the R package:
 *   do data-raw/stata_fixtures.do
-* The fixtures shipped with the package were written by apexog 0.21.0 in
+* The fixtures shipped with the package were written by apexog 0.21.1 in
 * StataNow 19.5.
 *==============================================================================
 clear all

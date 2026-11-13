@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">apexog</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -68,6 +68,11 @@
       <small>Source: <a href="https://github.com/jespernwulff/apexog/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.21.1" id="apexog-0211">apexog 0.21.1<a class="anchor" aria-label="anchor" href="#apexog-0211"></a></h2>
+<ul><li>Fractional-probit first stage (<code>firststage = "fprobit"</code>): the first-stage weight, minus the derivative of the generalized residual in the first-stage index, now uses the formula for a fractional regressor, <code>chat * (wpi + chat) + d * (1 - d) * (phi / (Phi * (1 - Phi)))^2</code>. Versions through 0.21.0 used the binary-probit identity <code>chat * (wpi + chat)</code>, which holds only for a 0/1 regressor. Point estimates are unchanged; the mean standard error with a fractional-probit first stage moves by at most about 3%, in either direction, in the validation design, because the two places the weight enters largely offset each other. All other first stages, and a fractional-probit first stage on a 0/1 regressor, are unchanged. Mirrors Stata apexog 0.21.1.</li>
+<li>New tests check the fractional-probit and Poisson first stages against a stacked two-step estimator differentiated numerically in every parameter.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.21.0" id="apexog-0210">apexog 0.21.0<a class="anchor" aria-label="anchor" href="#apexog-0210"></a></h2>
 <ul><li>The standard error of every two-step effect (APE and AIE, all first stages, <code>cfinteract</code>, cluster-robust) now adds the direct dependence of the effect on the estimated first-stage parameters through the control function: the influence function is <code>J_beta' psi_beta + J_pi' psi_pi</code>, where versions through 0.20.1 used only the first term (as does Stata’s <code>cfprobit</code> followed by <code>margins</code>). Point estimates are unchanged; standard errors move by about 1% in the validation designs, in either direction. The bivariate-probit engine is unaffected. Mirrors Stata apexog 0.21.0.</li>

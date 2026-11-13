@@ -166,7 +166,7 @@ outcome index.
     noise (CHR 2012, eq. 7).  The prior-only spread is reported as well.}
 }
 
-This is an R port of the Stata command \code{apexog} (v0.21.0); results agree
+This is an R port of the Stata command \code{apexog} (v0.21.1); results agree
 with Stata to optimizer tolerance (about 1e-7 relative on the validation
 specifications).  Random draws differ between R and Stata, so LTZ intervals
 agree only in distribution unless the same \code{draws} are supplied.

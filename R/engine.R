@@ -1,7 +1,7 @@
 # Control-function engine: one fit of the main probit at a given gamma-offset,
 # the Murphy-Topel two-step covariance, and the APE / AIE delta method.
 # A line-by-line port of _apexogfit + Mata _apexogfit_apese_mt (Stata apexog
-# v0.21.0).  `S` is the model setup built once by apexog().
+# v0.21.1).  `S` is the model setup built once by apexog().
 
 # --- first stages ------------------------------------------------------------
 # Returns list(chat, A): the control function (residual / generalized residual)
@@ -32,8 +32,14 @@
   if (type %in% c("probit", "fprobit")) {
     Phi <- stats::pnorm(wpi)
     Phim <- stats::pnorm(-wpi)
-    chat <- (d - Phi) * stats::dnorm(wpi) / (Phi * Phim)
+    lam <- stats::dnorm(wpi) / (Phi * Phim)
+    chat <- (d - Phi) * lam
+    # A = -d(chat)/d(wpi).  chat * (wpi + chat) is the binary-probit identity;
+    # for a fractional regressor the derivative has the extra term
+    # d (1 - d) lam^2, which is zero when d is 0 or 1 (apexog <= 0.21.0 omitted it
+    # for "fprobit").
     A <- chat * (wpi + chat)
+    if (type == "fprobit") A <- A + d * (1 - d) * lam^2
   } else {
     mu <- exp(wpi)
     chat <- d - mu

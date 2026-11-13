@@ -1,3 +1,18 @@
+# apexog 0.21.1
+
+* Fractional-probit first stage (`firststage = "fprobit"`): the first-stage
+  weight, minus the derivative of the generalized residual in the first-stage
+  index, now uses the formula for a fractional regressor,
+  `chat * (wpi + chat) + d * (1 - d) * (phi / (Phi * (1 - Phi)))^2`.  Versions
+  through 0.21.0 used the binary-probit identity `chat * (wpi + chat)`, which
+  holds only for a 0/1 regressor.  Point estimates are unchanged; the mean
+  standard error with a fractional-probit first stage moves by at most about
+  3%, in either direction, in the validation design, because the two places
+  the weight enters largely offset each other.  All other first stages, and a fractional-probit first
+  stage on a 0/1 regressor, are unchanged.  Mirrors Stata apexog 0.21.1.
+* New tests check the fractional-probit and Poisson first stages against a
+  stacked two-step estimator differentiated numerically in every parameter.
+
 # apexog 0.21.0
 
 * The standard error of every two-step effect (APE and AIE, all first stages,
