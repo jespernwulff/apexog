@@ -37,7 +37,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">apexog</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -130,6 +130,12 @@ their errors, with the violation as an offset in the outcome equation.
 There is no generated regressor, so the standard errors are ordinary
 maximum-likelihood ones. The output also reports the estimated error
 correlation ρ.</p>
+<p>A linear first stage is not a third route to a causal estimate. A 0/1
+treatment cannot have the normal linear first stage the control-function
+model assumes. apexog still fits it (it is the default in R when no
+first stage is named, and in Stata when the regressor is written without
+<code>i.</code>), but the result is a descriptive fitted contrast, and
+the output says so.</p>
 <p>The <code>certification</code> data were simulated with jointly
 normal errors (correlation 0.5), and the true average effect of
 certification on the probability of promotion is about 0.21:</p>
@@ -262,7 +268,7 @@ pays off more under a supportive manager:</p>
 <span><span class="va">aie</span></span>
 <span><span class="co">#&gt; ------------------------------------------------------------------------------</span></span>
 <span><span class="co">#&gt; Plausibly-exogenous AIE bounds (CHR 2012, UCI method)</span></span>
-<span><span class="co">#&gt; Estimator: cfprobit  |  First stage: linear linear  |  SE: Murphy-Topel  |  N = 4000</span></span>
+<span><span class="co">#&gt; Estimator: cfprobit  |  First stage: linear linear  |  SE: two-step  |  N = 4000</span></span>
 <span><span class="co">#&gt; Target:    Average Interaction Effect (training x manager): continuous-by-binary (first difference in manager)</span></span>
 <span><span class="co">#&gt; ------------------------------------------------------------------------------</span></span>
 <span><span class="co">#&gt; Baseline (gamma = 0):</span></span>

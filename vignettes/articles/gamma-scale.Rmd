@@ -52,6 +52,14 @@ probit or Poisson first stage it does not apply: in simulations the structural
 with those first stages; state the violation on the index or in probability
 points instead. apexog accepts the combination but prints a warning.
 
+Even with a linear first stage the conversion divides by the baseline σ̃, which
+is exact only as *γ* shrinks to zero. With one continuous endogenous regressor
+and one instrument, a structural value has a unique index-scale counterpart only below
+|π<sub>z</sub>|/σ<sub>v</sub> in absolute value (the first-stage coefficient of
+the instrument over the first-stage residual standard deviation). The output
+reports that limit (`gs_max`; in Stata `e(gs_max)`) and warns when the range or
+the prior draws reach it. The results themselves are not changed.
+
 </div>
 
 ## The same belief, three ways

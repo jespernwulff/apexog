@@ -37,7 +37,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">apexog</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -111,7 +111,7 @@
     
 <p>This page runs a first analysis of the example data with the Stata
 command. The <a href="apexog.html">R version</a> runs the same analysis
-on the same file. The output below comes from apexog 0.21.0 in StataNow
+on the same file. The output below comes from apexog 0.21.2 in StataNow
 19.5 (<code>data-raw/site_examples.do</code> in the R package’s
 repository).</p>
 <div class="section level2">
@@ -152,7 +152,7 @@ parentheses. Here the subsidy’s direct effect is assumed to lie between
 
 ------------------------------------------------------------------------------
 Plausibly-exogenous APE bounds (CHR 2012, UCI method)
-Estimator: cfprobit  |  First stage: linear  |  SE: Murphy-Topel  |  N = 4000
+Estimator: cfprobit  |  First stage: linear  |  SE: two-step  |  N = 4000
 Endogenous: training
 Target:    APE of every endogenous regressor (default)
 ------------------------------------------------------------------------------
@@ -213,7 +213,7 @@ normal with mean 0 and variance 0.0025:</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode stata"><code class="sourceCode stata"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>apexog ltz promoted tenure manager (training = subsidy), mu(0) omega(0.0025) iterations(1000) <span class="dv">seed</span>(101)</span></code></pre></div>
 <pre class="stata-output"><code>------------------------------------------------------------------------------
 Plausibly-exogenous APE bounds (CHR 2012, LTZ method, gaussian prior)
-Estimator: cfprobit  |  First stage: linear  |  SE: Murphy-Topel  |  N = 4000
+Estimator: cfprobit  |  First stage: linear  |  SE: two-step  |  N = 4000
 Endogenous: training
 Target:    APE of every endogenous regressor (default)
 ------------------------------------------------------------------------------

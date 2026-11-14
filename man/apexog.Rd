@@ -116,7 +116,15 @@ endogenous interaction.}
 \code{"latent"} (probit-index units; default), \code{"pr"} (probability
 points, divided by \eqn{m_\phi}, the average density at the baseline fit),
 or \code{"structural"} (structural-latent units, divided by
-\eqn{\tilde\sigma}; derived for a linear first stage).}
+\eqn{\tilde\sigma}; derived for a linear first stage).  The structural
+conversion uses the baseline \eqn{\tilde\sigma}, which is exact only at
+\eqn{\gamma = 0}.  With one continuous endogenous regressor, one
+instrument and a linear first stage, a structural value has a unique
+index-scale counterpart only below \eqn{|\pi_z|/\sigma_v} in absolute
+value (returned as \code{gs_max}); \code{print} reports that limit and
+warns when the UCI box or LTZ prior draws reach it.  For a 0/1 regressor
+with a linear first stage the conversion is not derived and \code{print}
+warns of that instead.  Results are not changed.}
 
 \item{level}{Confidence level, as a fraction or a percent (default 0.95).}
 
@@ -139,7 +147,11 @@ An object of class \code{"apexog"}: a list with, among others,
   \code{baseline} (estimates at \eqn{\gamma = 0}), \code{bounds} (UCI union or
   LTZ interval per target), \code{prior_band} (LTZ), \code{grid} and
   \code{grid_pr} (UCI), \code{sims} (LTZ draws and refit estimates),
-  \code{mphi}, \code{stilde}, \code{coefficients} and \code{vcov} (baseline
+  \code{mphi}, \code{stilde}, \code{gs_max} (the limit of the structural
+  scale, \code{NA} when not defined), \code{binlin} (0/1 endogenous
+  regressors that got a linear first stage, for which the effect is a
+  descriptive fitted contrast rather than a causal estimate; \code{print}
+  says so), \code{coefficients} and \code{vcov} (baseline
   targets), and \code{model} (the baseline main-equation coefficients with
   their Murphy-Topel covariance, or the bivariate-probit coefficients with
   their robust MLE covariance).  Methods: \code{print}, \code{summary}, \code{coef}, \code{vcov},
@@ -151,7 +163,8 @@ spirit of Conley, Hansen and Rossi (2012).  The exclusion restriction is
 relaxed to \eqn{y^* = x'\beta + d\delta + z'\gamma + \varepsilon}, and the
 target is the average partial effect (APE) of each endogenous regressor (or
 an average interaction effect, AIE) on the probability scale, estimated by a
-control-function probit (two-step, Murphy-Topel standard errors) or, for one
+control-function probit (two-step standard errors: the Murphy-Topel
+parameter covariance plus the direct first-stage term) or, for one
 0/1 treatment, by a recursive bivariate probit.  At every assumed violation
 \eqn{\gamma} the model is refit with \eqn{z'\gamma} as an offset in the
 outcome index.
@@ -166,7 +179,7 @@ outcome index.
     noise (CHR 2012, eq. 7).  The prior-only spread is reported as well.}
 }
 
-This is an R port of the Stata command \code{apexog} (v0.21.1); results agree
+This is an R port of the Stata command \code{apexog} (v0.21.2); results agree
 with Stata to optimizer tolerance (about 1e-7 relative on the validation
 specifications).  Random draws differ between R and Stata, so LTZ intervals
 agree only in distribution unless the same \code{draws} are supplied.

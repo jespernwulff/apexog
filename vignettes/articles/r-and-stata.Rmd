@@ -57,7 +57,7 @@ scales for the violation and the local-to-zero refits at Stata's own draws.
 | `e(gamma_sim)`, `e(gamma_pr_sim)` | `fit$sims$gamma`, `fit$sims$gamma_pr` |
 | `e(ape_sim)`, `e(se_sim)`, `e(ape_sim_cnv)` | `fit$sims$est`, `fit$sims$se`, `fit$sims$est_cnv` |
 | `e(sweep)` | `fit$sweep` |
-| `e(mphi)`, `e(stilde)`, `e(rho)` | `fit$mphi`, `fit$stilde`, `fit$rho` |
+| `e(mphi)`, `e(stilde)`, `e(gs_max)`, `e(rho)` | `fit$mphi`, `fit$stilde`, `fit$gs_max`, `fit$rho` |
 | `e(N)`, `e(N_clust)` | `nobs(fit)`, `fit$N_clust` |
 | `e(firststage)`, `e(estimator)`, `e(vce)`, `e(instruments)` | `fit$firststage`, `fit$estimator`, `fit$vce`, `fit$instruments` |
 | (not stored) | `fit$model`: the main equation's coefficients and their covariance at *γ* = 0 |

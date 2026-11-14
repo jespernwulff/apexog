@@ -10,7 +10,8 @@
   if (type == "linear") {
     f <- stats::lm.fit(W, d)
     wpi <- d - f$residuals
-    return(list(chat = f$residuals, A = rep(1, length(d)), wpi = wpi))
+    return(list(chat = f$residuals, A = rep(1, length(d)), wpi = wpi,
+                coef = f$coefficients))
   }
   fam <- switch(type,
     probit  = stats::binomial(link = "probit"),

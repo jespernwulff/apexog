@@ -24,7 +24,7 @@ out <- c(
   'title: "Stata help file"',
   "---",
   "",
-  "The help file of the Stata command, version 0.21.1, as Stata displays it",
+  "The help file of the Stata command, version 0.21.2, as Stata displays it",
   "with `help apexog` (rendered to text with Stata's `smcl2txt` translator).",
   "",
   "```{.stata-output}",

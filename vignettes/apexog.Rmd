@@ -59,8 +59,9 @@ The output has three parts.
 - **Baseline**: the APE with a valid instrument (*γ* = 0), its standard error
   and confidence interval. With a linear first stage this is the estimate that
   `cfprobit` followed by `margins, dydx(training)` gives in Stata. The
-  standard error is the Murphy–Topel two-step standard error, which accounts
-  for the estimated first-stage residual in the main probit.
+  standard error is a two-step one: the Murphy–Topel correction for the
+  estimated first-stage residual in the main probit, plus the direct dependence
+  of the effect on the first stage.
 - **Scale**: what one unit of *γ* on the latent index means. Here it changes
   the probability of promotion by 0.209, or 20.9 percentage points, per unit of
   the subsidy, on average; the second line converts to the structural latent

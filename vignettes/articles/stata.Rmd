@@ -4,7 +4,7 @@ title: "Get started in Stata"
 
 This page runs a first analysis of the example data with the Stata command.
 The [R version](apexog.html) runs the same analysis on the same file. The
-output below comes from apexog 0.21.0 in StataNow 19.5
+output below comes from apexog 0.21.2 in StataNow 19.5
 (`data-raw/site_examples.do` in the R package's repository).
 
 ## Install
@@ -49,7 +49,7 @@ Running UCI grid: 11 point(s) per instrument, 1 instrument(s), 11 total grid poi
 
 ------------------------------------------------------------------------------
 Plausibly-exogenous APE bounds (CHR 2012, UCI method)
-Estimator: cfprobit  |  First stage: linear  |  SE: Murphy-Topel  |  N = 4000
+Estimator: cfprobit  |  First stage: linear  |  SE: two-step  |  N = 4000
 Endogenous: training
 Target:    APE of every endogenous regressor (default)
 ------------------------------------------------------------------------------
@@ -114,7 +114,7 @@ apexog ltz promoted tenure manager (training = subsidy), mu(0) omega(0.0025) ite
 ```{.stata-output}
 ------------------------------------------------------------------------------
 Plausibly-exogenous APE bounds (CHR 2012, LTZ method, gaussian prior)
-Estimator: cfprobit  |  First stage: linear  |  SE: Murphy-Topel  |  N = 4000
+Estimator: cfprobit  |  First stage: linear  |  SE: two-step  |  N = 4000
 Endogenous: training
 Target:    APE of every endogenous regressor (default)
 ------------------------------------------------------------------------------

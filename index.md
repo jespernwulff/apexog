@@ -57,7 +57,7 @@ apexog(promoted ~ tenure + manager, endog = training ~ subsidy,
        data = promotion, method = "uci", gmin = -0.10, gmax = 0.10, grid = 11)
 #> ------------------------------------------------------------------------------
 #> Plausibly-exogenous APE bounds (CHR 2012, UCI method)
-#> Estimator: cfprobit  |  First stage: linear  |  SE: Murphy-Topel  |  N = 4000
+#> Estimator: cfprobit  |  First stage: linear  |  SE: two-step  |  N = 4000
 #> Endogenous: training
 #> Target:    APE of training
 #> ------------------------------------------------------------------------------
@@ -85,7 +85,7 @@ apexog uci promoted tenure manager (training = subsidy), gmin(-0.10) gmax(0.10) 
 ```{.stata-output}
 ------------------------------------------------------------------------------
 Plausibly-exogenous APE bounds (CHR 2012, UCI method)
-Estimator: cfprobit  |  First stage: linear  |  SE: Murphy-Topel  |  N = 4000
+Estimator: cfprobit  |  First stage: linear  |  SE: two-step  |  N = 4000
 Endogenous: training
 Target:    APE of every endogenous regressor (default)
 ------------------------------------------------------------------------------

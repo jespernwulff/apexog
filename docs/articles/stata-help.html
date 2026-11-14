@@ -37,7 +37,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">apexog</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -109,7 +109,7 @@
 
     
     
-<p>The help file of the Stata command, version 0.21.1, as Stata displays
+<p>The help file of the Stata command, version 0.21.2, as Stata displays
 it with <code>help apexog</code> (rendered to text with Stata’s
 <code>smcl2txt</code> translator).</p>
 <pre class="stata-output"><code>Title
@@ -300,11 +300,14 @@ Description
         noise) is also displayed, as a sensitivity band, and returned in
         e(lo_prior_vec)/e(hi_prior_vec).
 
-    Standard errors use the Murphy-Topel two-step sandwich (Murphy &amp; Topel
-    1985), computed in Mata.  At gamma = 0 the resulting APE SE matches
-    cfprobit + margins, dydx() to machine precision (checked in the package's
-    validation suite).  With firststage(biprobit) (v0.19) the main equation
-    is instead the recursive bivariate probit fit jointly with the 0/1
+    Standard errors are two-step: the Murphy-Topel sandwich for the probit
+    coefficients (Murphy &amp; Topel 1985) plus the direct dependence of the
+    effect on the estimated first stage, computed in Mata; the results header
+    labels them "SE: two-step".  At gamma = 0 the point estimate matches
+    cfprobit + margins, dydx() to machine precision, and the SE differs from
+    that benchmark by the direct term only, about 1% (see Methods and
+    formulas).  With firststage(biprobit) (v0.19) the main equation is
+    instead the recursive bivariate probit fit jointly with the 0/1
     treatment, and the SE is the MLE delta method; see the Options and
     Methods sections for when to prefer it.
 
@@ -323,7 +326,9 @@ Options
         variable.  Supported types:
 
         linear -- OLS regression (default).  Endogenous d is treated as
-            continuous.
+            continuous.  With a 0/1 d the result is a descriptive fitted
+            contrast, not a causal estimate, and the results header says so
+            (see Input requirements and limitations).
 
         probit -- Probit regression.  Endogenous d must be binary {0, 1}.
             The control function is the generalized residual (d -
@@ -357,7 +362,11 @@ Options
     Under joint normality the two-step APE is biased, and increasingly so in
     the error correlation (the large-N table under Methods), so when that is
     the maintained model prefer biprobit.  The results header prints a note
-    whenever a generalized-residual first stage is in use.
+    whenever a generalized-residual first stage is in use.  A linear first
+    stage is not a third route to a causal estimate for a binary treatment: a
+    0/1 variable cannot have the normal linear first stage the
+    control-function model assumes, so that fit is a descriptive contrast
+    (the header prints a note, v0.21.2).
 
     Phase-1 (v0.10) shortcut: the type can also be declared in the
         endogenous-variable clause itself via the standard Stata
@@ -519,9 +528,9 @@ interactors are not supported in v0.9.
             simulations (n = 5000, R = 1000 per cell, gamma_true entered in
             structural units) the structural gamma enters the probit index
             essentially UNSCALED -- refitting at the raw structural gamma
-            gives Wald coverage of the true APE 0.936 against 0.589 for the
+            gives Wald coverage of the true APE 0.936 against 0.590 for the
             refit at gamma/sqrt(1 - rho^2) (binary d, probit first stage,
-            gamma_true = 0.2) and 0.950 against 0.881 (fractional d, fprobit
+            gamma_true = 0.2) and 0.949 against 0.877 (fractional d, fprobit
             first stage), and the interpolated zero-bias offset lies within
             5% of the structural gamma in all three generalized-residual
             designs (binary, fractional, and count d).  So do not use
@@ -550,6 +559,34 @@ interactors are not supported in v0.9.
             against a true sqrt(1 - rho^2) of 0.80; Poisson first stage 0.98,
             0.93, 0.61): the omitted z'gamma term is partly absorbed by the
             control-function coefficient through the first stage.
+
+        Limits of the structural conversion (v0.21.2).  Dividing by the
+            baseline sigma_tilde is exact only at gamma = 0.  The exact
+            index-scale value g of a structural value g_s solves g_s = g *
+            sigma_tilde(g), with sigma_tilde(g) the factor implied by the
+            refit at g.  With one continuous endogenous regressor, one
+            instrument and a linear first stage the control-function
+            coefficient of that refit is theta_cf(0) + g/pi_z, so
+            sigma_tilde(g) = (1 + sigma_v^2*(theta_cf(0) + g/pi_z)^2)^(-1/2),
+            with pi_z the first-stage coefficient of the instrument and
+            sigma_v the first-stage residual sd.  The map g -&gt; g *
+            sigma_tilde(g) is bounded: a structural value below
+            |pi_z|/sigma_v in absolute value has exactly one index-scale
+            counterpart, and a larger one has none or two.  apexog does not
+            solve this equation; it divides by the baseline factor.  With
+            gunits(structural) the header says so, reports the limit
+            |pi_z|/sigma_v when it is defined (also stored in e(gs_max)), and
+            prints a warning when the uci box reaches it or ltz prior draws
+            fall at or beyond it; results are unchanged.  For a 0/1 regressor
+            with a linear first stage the conversion has no model behind it:
+            the header prints a warning instead, and e(gs_max) is missing.
+            The baseline division also errs differently for positive and
+            negative violations: in simulations with a structural N(0,
+            0.30^2) prior (endogeneity correlation 0.6, limit 0.8) the
+            resulting LTZ intervals covered 0.942 overall, but 57 of the 58
+            misses were at positive violations.  For statements that do not
+            rest on this approximation, elicit on the index scale or with
+            gunits(pr).
 
         Exact probability scale of the refits (v0.20).  Whatever the input
             scale, apexog also reports, at every refit, the EXACT
@@ -758,8 +795,8 @@ Input requirements and limitations
             units" header line) is derived for a linear first stage.  With
             firststage(probit), fprobit, or poisson Monte Carlo simulations
             put the correct offset at the UNSCALED structural gamma (Wald
-            coverage at the true violation 0.936 vs 0.589 for binary d and
-            0.950 vs 0.881 for fractional d, raw gamma vs gamma/sqrt(1 -
+            coverage at the true violation 0.936 vs 0.590 for binary d and
+            0.949 vs 0.877 for fractional d, raw gamma vs gamma/sqrt(1 -
             rho^2); zero-bias offset within 5% of the structural gamma), so
             the option should not be used with those first stages.  apexog
             accepts the combination but prints a warning line in the results
@@ -767,6 +804,29 @@ Input requirements and limitations
             formula evaluated on a generalized residual, not a conversion
             factor.  Elicit on the index scale or with gunits(pr) instead;
             see gunits().
+        - gunits(structural) uses the baseline sigma_tilde.  The conversion
+            is exact only at gamma = 0, and with one continuous endogenous
+            regressor, one instrument and a linear first stage a structural
+            value at or beyond |pi_z|/sigma_v in absolute value has no unique
+            index-scale counterpart.  apexog accepts such values but prints
+            the limit and a warning in the results header (results
+            unchanged).  With a 0/1 regressor and a linear first stage the
+            conversion is not derived at all, and the header warns of that
+            instead; see gunits().
+        - A 0/1 endogenous regressor with a linear first stage is a
+            descriptive fit.  The control-function model assumes a linear
+            first stage with a normal error independent of the instruments,
+            which a binary treatment cannot satisfy.  apexog accepts the
+            combination ((d = z) with a 0/1 d defaults to it; (i.d = z)
+            selects the probit first stage) and reports the fitted discrete
+            change with its two-step standard error, but the results header
+            notes that the effect is a descriptive fitted contrast without a
+            causal interpretation or a causal coverage claim.  When a causal
+            reading is intended use firststage(biprobit) (joint normality) or
+            firststage(probit) (control-function sufficiency).  A 0/1
+            treatment inside an endogenous interaction has no validated
+            alternative (firststage(biprobit) takes no AIE target) and is
+            descriptive only.
         - A first stage that drops observations (perfect prediction in a
             probit first stage) or leaves the control function undefined
             stops the command.  Perfect prediction or a collinear control
@@ -796,8 +856,9 @@ Stored results
       e(N)                sample size
       e(level)            confidence level
       e(baseline_ape)     APE (or AIE if aie()) at gamma = 0
-      e(baseline_se)      MT-corrected SE at gamma = 0 (MLE delta-method SE
-                            with firststage(biprobit))
+      e(baseline_se)      two-step SE at gamma = 0: Murphy-Topel parameter
+                            covariance plus the direct first-stage term (MLE
+                            delta-method SE with firststage(biprobit))
       e(mphi)             mean(normalden(eta_hat)) at the baseline fit:
                             average dPr/dindex slope; the
                             latent-to-probability conversion factor used by
@@ -813,6 +874,11 @@ Stored results
                             gunits()); = 1 with firststage(biprobit).  A
                             baseline-fit quantity: it moves with the true
                             violation
+      e(gs_max)           |pi_z|/sigma_v: a structural-latent gamma below it
+                            in absolute value has a unique index-scale
+                            counterpart (v0.21.2; one continuous endogenous
+                            regressor with one instrument and a linear first
+                            stage, missing otherwise); see gunits()
       e(rho)              (with firststage(biprobit)) estimated correlation
                             of the outcome and treatment errors at the
                             baseline fit
@@ -840,7 +906,10 @@ Stored results
                             user-supplied gamma values)
       e(estimator)        cfprobit, or biprobit with firststage(biprobit)
       e(firststage)       linear, probit, fprobit, poisson, or biprobit
-      e(vce)              Murphy-Topel, or MLE with firststage(biprobit)
+      e(vce)              Murphy-Topel for the two-step control-function
+                            estimator (the header labels its standard error
+                            "two-step"; the stored string is unchanged), or
+                            MLE with firststage(biprobit)
       e(depvar)           name of dependent variable
       e(endog)            names of the endogenous regressors
       e(exog)             names of exogenous regressors
@@ -966,7 +1035,10 @@ Methods and formulas
     equals mean(phi) * (b_d + b_z/pi_z) from a plain probit of y on the
     controls, d and z, whose stacked delta-method variance the two-term
     formula reproduces to machine precision.  firststage(biprobit) is a joint
-    MLE and is not affected.
+    MLE and is not affected.  Since version 0.21.2 the results header labels
+    this standard error "SE: two-step"; earlier versions printed
+    "Murphy-Topel", the name of its first term, and e(vce) still stores that
+    string.
 
     Fractional-probit first stage (version 0.21.1).  The first-stage weight
     A_i is minus the derivative of the control function in the first-stage
@@ -1144,13 +1216,13 @@ Methods and formulas
     structural latent index, UCI box [-0.3, 0.3] on the index scale) confirm
     it for the linear first stage -- the Wald interval from the refit at the
     index-scale offset gamma_true/sqrt(1 - rho^2) covers the
-    conditional-on-CF APE 0.946 and 0.932 at gamma_true = 0.2 and 0.5, the
-    refit at the raw structural gamma only 0.526 and 0.011 -- and reject it
+    conditional-on-CF APE 0.952 and 0.939 at gamma_true = 0.2 and 0.5, the
+    refit at the raw structural gamma only 0.536 and 0.014 -- and reject it
     for the generalized-residual first stages:  with a binary d and a probit
     first stage (bivariate-normal design, rho = 0.5) the refit at the raw
-    gamma covers 0.936 against 0.589 for the refit at gamma/sqrt(1 - rho^2)
+    gamma covers 0.936 against 0.590 for the refit at gamma/sqrt(1 - rho^2)
     at gamma_true = 0.2; with a fractional d and an fprobit first stage (rho
-    = 0.4) 0.950 against 0.881; and interpolating the bias between the two
+    = 0.4) 0.949 against 0.877; and interpolating the bias between the two
     offsets puts the zero-bias offset at 0.195 and 0.518 (binary d), 0.200
     and 0.524 (fractional d), and 0.206 and 0.516 (count d, Poisson first
     stage, against the structural slope APE) for gamma_true = 0.2 and 0.5,
@@ -1159,7 +1231,7 @@ Methods and formulas
     neither sqrt(1 - rho^2) nor e(stilde) (0.92, 0.92, 0.98 at gamma_true = 0
     in those designs) is the model-implied factor, and for binary and
     fractional d dividing by it moves the offset the wrong way (the coverage
-    losses 0.936 -&gt; 0.589 and 0.950 -&gt; 0.881 above).  gunits(structural)
+    losses 0.936 -&gt; 0.590 and 0.949 -&gt; 0.877 above).  gunits(structural)
     should therefore be used with a linear first stage only; with
     firststage(probit), fprobit, or poisson apexog accepts it unchanged but
     prints a warning line in the header.  Consistently, the
@@ -1169,7 +1241,11 @@ Methods and formulas
     the mean e(stilde) is 0.80, 0.91, 1.00 with the linear first stage (true
     sqrt(1 - rho^2) = 0.80) and 0.98, 0.93, 0.61 with the Poisson first stage
     at gamma_true = 0, 0.2, 0.5: the omitted z'gamma term is partly absorbed
-    by the control-function coefficient through the first stage.
+    by the control-function coefficient through the first stage.  Dividing by
+    the baseline factor is therefore an approximation even with a linear
+    first stage, and a structural value at or beyond |pi_z|/sigma_v has no
+    unique index-scale counterpart (v0.21.2: header line and warning,
+    e(gs_max)); see gunits().
 
     Average Interaction Effect (with aie(X Z)).  Three cases based on the
     auto-detected types of X and Z:

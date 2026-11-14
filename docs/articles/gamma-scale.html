@@ -37,7 +37,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">apexog</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -157,6 +157,15 @@ essentially unscaled. Do not combine <code>gunits = "structural"</code>
 with those first stages; state the violation on the index or in
 probability points instead. apexog accepts the combination but prints a
 warning.</p>
+<p>Even with a linear first stage the conversion divides by the baseline
+σ̃, which is exact only as <em>γ</em> shrinks to zero. With one
+continuous endogenous regressor and one instrument, a structural value
+has a unique index-scale counterpart only below
+|π<sub>z</sub>|/σ<sub>v</sub> in absolute value (the first-stage
+coefficient of the instrument over the first-stage residual standard
+deviation). The output reports that limit (<code>gs_max</code>; in Stata
+<code>e(gs_max)</code>) and warns when the range or the prior draws
+reach it. The results themselves are not changed.</p>
 </div>
 </div>
 <div class="section level2">

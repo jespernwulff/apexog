@@ -1,3 +1,26 @@
+# apexog 0.21.2
+
+Display and documentation only: no estimate, standard error or interval
+changes.  Mirrors Stata apexog 0.21.2.
+
+* `print()` labels the standard error of the control-function estimator
+  "two-step" (the Murphy-Topel parameter covariance plus the direct first-stage
+  term, as computed since 0.21.0).  The `vce` element still holds
+  `"Murphy-Topel"`.
+* A note is printed when a 0/1 endogenous regressor has a linear first stage.
+  A binary treatment cannot have the normal linear first stage the
+  control-function model assumes, so the effect is a descriptive fitted
+  contrast, not a causal estimate; use `firststage = "biprobit"` or `"probit"`
+  when a causal reading is intended.  The regressors concerned are returned in
+  the new `binlin` element.
+* `gunits = "structural"`: `print()` states that the conversion uses the
+  baseline sigma_tilde, which is exact only at gamma = 0.  With one continuous
+  endogenous regressor, one instrument and a linear first stage it reports the limit
+  `|pi_z| / sigma_v` below which a structural value has a unique index-scale
+  counterpart (new element `gs_max`, `NA` otherwise), and warns when the UCI
+  box or LTZ prior draws reach it.  For a 0/1 regressor with a linear first
+  stage the conversion is not derived, and a warning says so.
+
 # apexog 0.21.1
 
 * Fractional-probit first stage (`firststage = "fprobit"`): the first-stage

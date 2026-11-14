@@ -3,6 +3,8 @@
 # into tests/testthat/fixtures/stata_fixtures.rds, so the R test suite needs
 # neither Stata nor haven.  Run from the package root:
 #   Rscript data-raw/make_fixtures.R
+# The .dta files in data-raw/stata_fixtures/ are not kept in the repository;
+# run data-raw/stata_fixtures.do first to create them.
 # Structure of the .rds:
 #   list(data = <data.frame>,
 #        specs = list(A1 = list(m = list(<matrix>...), s = c(<scalars>),

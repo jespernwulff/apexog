@@ -39,7 +39,7 @@
     
     <a class="navbar-brand me-2" href="index.html">apexog</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -178,7 +178,7 @@ apexog answers that question for instrumental-variables models with a binary out
 <span>       data <span class="op">=</span> <span class="va">promotion</span>, method <span class="op">=</span> <span class="st">"uci"</span>, gmin <span class="op">=</span> <span class="op">-</span><span class="fl">0.10</span>, gmax <span class="op">=</span> <span class="fl">0.10</span>, grid <span class="op">=</span> <span class="fl">11</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ------------------------------------------------------------------------------</span></span>
 <span><span class="co">#&gt; Plausibly-exogenous APE bounds (CHR 2012, UCI method)</span></span>
-<span><span class="co">#&gt; Estimator: cfprobit  |  First stage: linear  |  SE: Murphy-Topel  |  N = 4000</span></span>
+<span><span class="co">#&gt; Estimator: cfprobit  |  First stage: linear  |  SE: two-step  |  N = 4000</span></span>
 <span><span class="co">#&gt; Endogenous: training</span></span>
 <span><span class="co">#&gt; Target:    APE of training</span></span>
 <span><span class="co">#&gt; ------------------------------------------------------------------------------</span></span>
@@ -201,7 +201,7 @@ apexog answers that question for instrumental-variables models with a binary out
 <span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>apexog uci promoted tenure manager (training = subsidy), gmin(-0.10) gmax(0.10) <span class="bn">grid</span>(11)</span></code></pre></div>
 <pre class="stata-output"><code>------------------------------------------------------------------------------
 Plausibly-exogenous APE bounds (CHR 2012, UCI method)
-Estimator: cfprobit  |  First stage: linear  |  SE: Murphy-Topel  |  N = 4000
+Estimator: cfprobit  |  First stage: linear  |  SE: two-step  |  N = 4000
 Endogenous: training
 Target:    APE of every endogenous regressor (default)
 ------------------------------------------------------------------------------

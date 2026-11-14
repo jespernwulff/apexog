@@ -38,8 +38,24 @@ print.apexog <- function(x, ...) {
     cat("Estimator: biprobit (recursive bivariate probit, MLE)  |  SE: delta method  |  N = ",
         x$N, "\n", sep = "")
   } else {
+    # "two-step" = the Murphy-Topel parameter covariance plus the direct
+    # first-stage term of the effect (the SE computed since 0.21.0)
     cat("Estimator: cfprobit  |  First stage: ", paste(x$firststage, collapse = " "),
-        "  |  SE: Murphy-Topel  |  N = ", x$N, "\n", sep = "")
+        "  |  SE: two-step  |  N = ", x$N, "\n", sep = "")
+    if (length(x$binlin)) {
+      cat("Note:      0/1 endogenous regressor with a linear first stage (",
+          paste(x$binlin, collapse = " "), "):\n",
+          "           a binary treatment cannot have the normal linear first stage the\n",
+          "           control-function model assumes, so the effect is a descriptive\n",
+          sep = "")
+      if (x$target == "aie") {
+        cat("           fitted contrast without a causal interpretation (see ?apexog).\n")
+      } else {
+        cat("           fitted contrast without a causal interpretation.  For a causal\n",
+            "           reading use firststage = \"biprobit\" or \"probit\"; see ?apexog.\n",
+            sep = "")
+      }
+    }
     if (any(x$firststage %in% c("probit", "fprobit", "poisson")))
       cat("Note:      the generalized-residual control function (probit/fprobit/poisson\n",
           "           first stage) is consistent under Wooldridge's sufficiency assumption\n",
@@ -76,8 +92,32 @@ print.apexog <- function(x, ...) {
   if (x$gunits == "structural") {
     cat("           gunits = \"structural\": gamma values were divided by sigma_tilde;\n",
         "           values below are latent-index units.\n", sep = "")
-    if (any(x$firststage %in% c("probit", "fprobit", "poisson")))
+    gr <- any(x$firststage %in% c("probit", "fprobit", "poisson"))
+    if (gr)
       cat("Warning:   sigma_tilde conversion derived for a LINEAR first stage.\n")
+    # v0.21.2: the baseline conversion and the limit of the structural scale
+    if (length(x$binlin)) {
+      cat("Warning:   sigma_tilde conversion not derived for a 0/1 regressor (see Note).\n")
+    } else if (x$estimator == "cfprobit" && !gr) {
+      cat("           The conversion uses the baseline sigma_tilde, exact only at gamma = 0.\n")
+    }
+    if (!is.null(x$gs_max) && is.finite(x$gs_max)) {
+      cat("           A structural value has a unique index-scale counterpart only below\n",
+          "           |pi_z|/sigma_v = ", .fmt(x$gs_max, 4),
+          " in absolute value (see ?apexog).\n", sep = "")
+      if (x$method == "uci") {
+        bm <- max(abs(c(x$gmin, x$gmax)))
+        if (bm >= x$gs_max)
+          cat("Warning:   the box reaches ", .fmt(bm, 4),
+              " structural units, at or beyond that limit.\n", sep = "")
+      } else {
+        # the stored draws are index units; times sigma_tilde = structural units
+        sh <- mean(abs(x$sims$gamma[, 1]) * x$stilde >= x$gs_max)
+        if (sh > 0)
+          cat("Warning:   ", formatC(100 * sh, format = "f", digits = 1),
+              "% of the prior draws are at or beyond that limit.\n", sep = "")
+      }
+    }
   }
   lvl <- format(100 * x$level)
   inst <- x$instruments

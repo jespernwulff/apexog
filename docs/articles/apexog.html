@@ -37,7 +37,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">apexog</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -159,7 +159,7 @@ and 0.10 on the latent index:</p>
 <span><span class="va">fit</span></span>
 <span><span class="co">#&gt; ------------------------------------------------------------------------------</span></span>
 <span><span class="co">#&gt; Plausibly-exogenous APE bounds (CHR 2012, UCI method)</span></span>
-<span><span class="co">#&gt; Estimator: cfprobit  |  First stage: linear  |  SE: Murphy-Topel  |  N = 4000</span></span>
+<span><span class="co">#&gt; Estimator: cfprobit  |  First stage: linear  |  SE: two-step  |  N = 4000</span></span>
 <span><span class="co">#&gt; Endogenous: training</span></span>
 <span><span class="co">#&gt; Target:    APE of training</span></span>
 <span><span class="co">#&gt; ------------------------------------------------------------------------------</span></span>
@@ -181,8 +181,9 @@ and 0.10 on the latent index:</p>
 (<em>γ</em> = 0), its standard error and confidence interval. With a
 linear first stage this is the estimate that <code>cfprobit</code>
 followed by <code>margins, dydx(training)</code> gives in Stata. The
-standard error is the Murphy–Topel two-step standard error, which
-accounts for the estimated first-stage residual in the main probit.</li>
+standard error is a two-step one: the Murphy–Topel correction for the
+estimated first-stage residual in the main probit, plus the direct
+dependence of the effect on the first stage.</li>
 <li>
 <strong>Scale</strong>: what one unit of <em>γ</em> on the latent
 index means. Here it changes the probability of promotion by 0.209, or
@@ -235,7 +236,7 @@ normal with mean 0 and variance 0.0025 (standard deviation 0.05):</p>
 <span><span class="va">ltz</span></span>
 <span><span class="co">#&gt; ------------------------------------------------------------------------------</span></span>
 <span><span class="co">#&gt; Plausibly-exogenous APE bounds (CHR 2012, LTZ method, gaussian prior)</span></span>
-<span><span class="co">#&gt; Estimator: cfprobit  |  First stage: linear  |  SE: Murphy-Topel  |  N = 4000</span></span>
+<span><span class="co">#&gt; Estimator: cfprobit  |  First stage: linear  |  SE: two-step  |  N = 4000</span></span>
 <span><span class="co">#&gt; Endogenous: training</span></span>
 <span><span class="co">#&gt; Target:    APE of training</span></span>
 <span><span class="co">#&gt; ------------------------------------------------------------------------------</span></span>

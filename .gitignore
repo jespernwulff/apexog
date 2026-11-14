@@ -6,3 +6,7 @@
 # render leftovers of a pkgdown run (the site is in docs/)
 vignettes/*.html
 vignettes/articles/*.html
+# Stata reference results (.dta) are written by data-raw/stata_fixtures.do and
+# converted by data-raw/make_fixtures.R; the tests read only
+# tests/testthat/fixtures/stata_fixtures.rds
+data-raw/stata_fixtures/
