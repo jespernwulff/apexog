@@ -4,7 +4,7 @@ title: "Get started in Stata"
 
 This page runs a first analysis of the example data with the Stata command.
 The [R version](apexog.html) runs the same analysis on the same file. The
-output below comes from apexog 0.21.2 in StataNow 19.5
+output below comes from apexog 0.22.0 in StataNow 19.5
 (`data-raw/site_examples.do` in the R package's repository).
 
 ## Install

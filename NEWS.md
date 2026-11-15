@@ -1,3 +1,23 @@
+# apexog 0.22.0
+
+* `firststage = "biprobit"` accepts an AIE target: the interaction of the 0/1
+  treatment with an exogenous moderator, binary or continuous, e.g.
+  `endog = d ~ z + z:m, aie = c("d", "m")` with `m` among the controls.  The
+  product enters only the outcome equation of the joint fit; the AIE is the
+  interaction contrast of the average structural function under joint
+  normality, with an MLE delta-method SE.  The model has one error correlation
+  for all values of the moderator, which can make this AIE much more precise
+  than an instrumental-variable contrast (and different from it).  Agrees with
+  Stata apexog 0.22.0, whose implementation is independent of this one.
+* Fix: the standard error of a binary-by-binary AIE with the
+  control-function engine.  The Jacobian entries of the two interactors and
+  their product used `j - X_i`, `k - Z_i` and `jk - X_i Z_i` instead of the
+  counterfactual values `j`, `k` and `jk`; point estimates were not affected.
+  In the validation data the corrected SE is 3% to 13% larger.  New tests
+  differentiate the full two-step estimator numerically for this case.
+* The print note for a 0/1 treatment with linear first stages inside an
+  interaction now points to the bivariate probit.  Mirrors Stata apexog 0.22.0.
+
 # apexog 0.21.2
 
 Display and documentation only: no estimate, standard error or interval

@@ -16,7 +16,7 @@
 * https://github.com/jespernwulff/stata-apexog).  Run in Stata from the root of
 * the R package:
 *   do data-raw/stata_fixtures.do
-* The fixtures shipped with the package were written by apexog 0.21.1 in
+* The fixtures shipped with the package were written by apexog 0.22.0 in
 * StataNow 19.5.
 *==============================================================================
 clear all
@@ -99,6 +99,9 @@ gen byte   yx   = (-0.2 + 0.3*x1 + 0.3*x3 + 0.3*x1*x3 + 0.5*d + e) > 0
 gen byte   yx2  = (-0.2 + 0.4*x1 + 0.3*x3 + 0.5*d + 0.4*d*x3 + e) > 0
 gen byte   yi   = (-0.2 + 0.4*x1 + 0.3*x2 + 0.5*d + 0.4*d*x2 + e) > 0
 gen byte   ybb  = (-0.2 + 0.3*x1 + 0.3*x2 + 0.5*db + 0.4*db*x2 + e) > 0
+* v0.22.0: binary treatment x continuous moderator (no random draw: the
+* other variables are unchanged)
+gen byte   ybc  = (-0.2 + 0.3*x1 + 0.3*x3 + 0.5*db + 0.4*db*x3 + e) > 0
 * a control with missing values
 gen double x1m  = x1
 replace    x1m  = . if runiform() < 0.03
@@ -193,6 +196,16 @@ fxsave D1
 apexog uci yb x1 x2 (db = z1 zb), firststage(biprobit) vce(cluster team) gmin(0) gmax(0) grid(2)
 fxsave D2
 
+* v0.22.0: AIE targets with the bivariate probit
+apexog uci ybb x1 x2 (db = z1 zb), firststage(biprobit) target(i.db#i.x2) gmin(-0.1) gmax(0.1) grid(3)
+fxsave D3
+
+apexog uci ybc x1 x3 (db = z1 zb), firststage(biprobit) target(i.db#c.x3) gmin(-0.1 -0.1) gmax(0.1 0.1) grid(2)
+fxsave D4
+
+apexog uci ybb x1 x2 (db = z1 c.z1#c.x2), firststage(biprobit) target(i.db#i.x2) vce(cluster team) gmin(0 -0.1) gmax(0 0.1) grid(3)
+fxsave D5
+
 *------------------------------------------------------------------------------
 * (E) gunits, priors, LTZ with AIE / biprobit
 *------------------------------------------------------------------------------
@@ -210,6 +223,9 @@ fxsave E4
 
 apexog ltz yb x1 x2 (db = z1 zb), firststage(biprobit) gunits(pr) mu(0) omega(0.0001) iterations(30) seed(105)
 fxsave E5
+
+apexog ltz ybb x1 x2 (db = z1 zb), firststage(biprobit) target(i.db#i.x2) mu(0 0) omega(0.0004 0.0004) iterations(20) seed(106)
+fxsave E7
 
 apexog uci y x1 x2 (d = z1), gunits(structural) gmin(-0.1) gmax(0.1) grid(3) level(90)
 fxsave E6

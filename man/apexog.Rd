@@ -84,7 +84,8 @@ the convolution noise then differs.}
 \code{"probit"} (0/1 regressor, generalized residual), \code{"fprobit"}
 (fractional regressor), \code{"poisson"} (count), or \code{"biprobit"}
 (recursive bivariate probit for a single 0/1 regressor; exact under joint
-normality).  A single value applies to every endogenous regressor,
+normality; its APE, or since 0.22.0 its AIE with an exogenous
+moderator).  A single value applies to every endogenous regressor,
 including a declared interaction such as \code{d:x} (which needs
 \code{"linear"}); otherwise give one value per endogenous regressor, in
 order of appearance, or a named vector (unnamed regressors default to
@@ -100,7 +101,12 @@ control column or an endogenous regressor (use numeric 0/1 variables, not
 regressor (\code{endog = d + d:x ~ ...}) that regressor is the target;
 otherwise the product is taken from \code{formula} when it is written as
 \code{x:z} or \code{x*z}, or added as an exogenous control.  Do not write
-it as \code{I(x*z)}: that is detected as a duplicate and refused.}
+it as \code{I(x*z)}: that is detected as a duplicate and refused.  With
+\code{firststage = "biprobit"} one of the two must be the 0/1 treatment and
+the other an exogenous moderator; the product then enters only the outcome
+equation of the joint fit (write the treatment alone in \code{endog},
+e.g. \code{endog = d ~ z + z:m}), and the AIE is the interaction contrast
+of the average structural function under joint normality.}
 
 \item{aie_binary}{Logical length-2 vector forcing the type of \code{X} and
 \code{Z} (\code{TRUE} = binary, \code{FALSE} = continuous, \code{NA} =
@@ -179,7 +185,7 @@ outcome index.
     noise (CHR 2012, eq. 7).  The prior-only spread is reported as well.}
 }
 
-This is an R port of the Stata command \code{apexog} (v0.21.2); results agree
+This is an R port of the Stata command \code{apexog} (v0.22.0); results agree
 with Stata to optimizer tolerance (about 1e-7 relative on the validation
 specifications).  Random draws differ between R and Stata, so LTZ intervals
 agree only in distribution unless the same \code{draws} are supplied.

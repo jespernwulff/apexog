@@ -1,5 +1,5 @@
 # Stata reference results (data-raw/stata_fixtures.do, apexog
-# v0.21.1, StataNow 19.5), converted by data-raw/make_fixtures.R.
+# v0.22.0, StataNow 19.5), converted by data-raw/make_fixtures.R.
 fx <- readRDS(test_path("fixtures", "stata_fixtures.rds"))
 fxdat <- fx$data
 
@@ -65,6 +65,15 @@ fx_calls <- list(
   D2 = function() apexog(yb ~ x1 + x2, endog = db ~ z1 + zb, data = fxdat,
                          firststage = "biprobit", cluster = ~team, gmin = 0, gmax = 0,
                          grid = 2, verbose = FALSE),
+  D3 = function() apexog(ybb ~ x1 + x2, endog = db ~ z1 + zb, data = fxdat,
+                         firststage = "biprobit", aie = c("db", "x2"), gmin = -0.1,
+                         gmax = 0.1, grid = 3, verbose = FALSE),
+  D4 = function() apexog(ybc ~ x1 + x3, endog = db ~ z1 + zb, data = fxdat,
+                         firststage = "biprobit", aie = c("db", "x3"), gmin = -0.1,
+                         gmax = 0.1, grid = 2, verbose = FALSE),
+  D5 = function() apexog(ybb ~ x1 + x2, endog = db ~ z1 + z1:x2, data = fxdat,
+                         firststage = "biprobit", aie = c("db", "x2"), cluster = ~team,
+                         gmin = c(0, -0.1), gmax = c(0, 0.1), grid = 3, verbose = FALSE),
   E1 = function() apexog(yb ~ x1 + x2, endog = db ~ z1 + zb, data = fxdat,
                          firststage = "probit", gunits = "pr", gmin = -0.02, gmax = 0.02,
                          grid = 3, verbose = FALSE),
@@ -80,6 +89,9 @@ fx_calls <- list(
                            aie = c("d", "x3"), method = "ltz", draws = dr, verbose = FALSE),
   E5 = function(dr) apexog(yb ~ x1 + x2, endog = db ~ z1 + zb, data = fxdat,
                            firststage = "biprobit", gunits = "pr", method = "ltz",
+                           draws = dr, verbose = FALSE),
+  E7 = function(dr) apexog(ybb ~ x1 + x2, endog = db ~ z1 + zb, data = fxdat,
+                           firststage = "biprobit", aie = c("db", "x2"), method = "ltz",
                            draws = dr, verbose = FALSE)
 )
-fx_ltz_conv <- list(A2 = 1, E2 = "stilde", E3 = 1, E4 = 1, E5 = "mphi")
+fx_ltz_conv <- list(A2 = 1, E2 = "stilde", E3 = 1, E4 = 1, E5 = "mphi", E7 = 1)

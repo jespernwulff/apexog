@@ -69,7 +69,8 @@ the bivariate probit. apexog prints a note whenever a generalized-residual
 control function is in use. The same caveat applies to fractional
 (`"fprobit"`) and count (`"poisson"`) treatments, for which no exact
 alternative is available. The bivariate probit handles one endogenous
-regressor and the average partial effect, not interaction effects.
+regressor; its target is the average partial effect or, with a moderator, the
+average interaction effect (see below).
 
 ## Interaction effects
 
@@ -129,6 +130,40 @@ Baseline (gamma = 0):
 
 The control functions are held at their observed values when the moderator is
 switched, as in `ginteff` after the corresponding probit.
+
+**A binary treatment and a moderator.** The construction above needs a
+continuous treatment: a 0/1 treatment cannot have a normal linear first stage,
+and its product with the moderator is a function of the two, so giving the
+product a first stage of its own defines no structural model (apexog prints a
+note when you try). Use the bivariate probit instead. Write the treatment alone
+in `endog`, keep the moderator among the controls and point `aie` at the pair;
+the product then enters only the outcome equation of the joint fit. The
+instruments may include the product of an instrument and the moderator, whose
+violation is then allowed for separately. In the `certification` data:
+
+```{r}
+data(certification)
+bpi <- apexog(promoted ~ tenure + manager,
+              endog = certified ~ subsidy + subsidy:manager,
+              data = certification, firststage = "biprobit",
+              aie = c("certified", "manager"),
+              gmin = c(-0.1, 0), gmax = c(0.1, 0), grid = 5, verbose = FALSE)
+bpi
+```
+
+The AIE is now the second difference of the average structural function under
+joint normality of the outcome and treatment errors, the model the bivariate
+probit maintains. The model has one error correlation and one treatment
+equation for both values of the moderator. Under that restriction the
+interaction is also identified from treatment variation the instrument does not
+generate, so it can be much more precise than an instrumental-variable contrast
+and can differ from it; when the estimated correlation is near zero it is close
+to the AIE of a probit that treats the treatment as exogenous. In Stata:
+
+```stata
+apexog uci promoted tenure manager (certified = subsidy c.subsidy#i.manager), ///
+    firststage(biprobit) target(i.certified#i.manager) gmin(-0.1 0) gmax(0.1 0) grid(5)
+```
 
 ## References
 

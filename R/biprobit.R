@@ -1,11 +1,12 @@
 # Recursive bivariate probit engine (firststage = "biprobit"): the port of
 # apexog's v0.19 engine.  At each gamma it fits
 #     y = 1{x1'b1 + gamma'z + e1 > 0},  x1 = [X, d, 1]
-#     d = 1{x2'b2 + e2 > 0},            x2 = [Z, X, 1]
+#     d = 1{x2'b2 + e2 > 0},            x2 = [Z, X, 1]  (X without an AIE product)
 #     corr(e1, e2) = rho = tanh(athrho)
 # jointly by maximum likelihood (Stata's -biprobit- with offset() in the outcome
-# equation), then computes the ASF discrete-change APE of d with a delta-method
-# SE from the robust (or cluster-robust) MLE covariance.  Parameter order
+# equation), then computes the ASF discrete-change APE of d (or, since 0.22.0,
+# the AIE of d and an exogenous moderator, whose product enters x1 only) with a
+# delta-method SE from the robust (or cluster-robust) MLE covariance.  Parameter order
 # matches Stata's e(b): [eq1: X, d, _cons | eq2: Z, X, _cons | athrho].
 
 # Log likelihood, per-observation scores and (optionally) the analytic
@@ -150,18 +151,28 @@
   }
   p1 <- ncol(S$bp_x1)
   b1 <- theta[seq_len(p1)]
-  di <- p1 - 1L                       # d is the column before _cons
-  d <- S$D[, 1]
   eta <- drop(S$bp_x1 %*% b1) + off
-  e1 <- eta + b1[di] * (1 - d)
-  e0 <- eta - b1[di] * d
-  f1 <- stats::dnorm(e1)
-  f0 <- stats::dnorm(e0)
-  dphi <- f1 - f0
-  est <- mean(stats::pnorm(e1) - stats::pnorm(e0))
   Jb <- numeric(length(theta))
-  Jb[seq_len(p1)] <- colMeans(S$bp_x1 * dphi)
-  Jb[di] <- mean(f1)
+  if (!is.null(S$aie)) {
+    # v0.22.0: AIE of the treatment and an exogenous moderator.  The outcome
+    # design S$bp_x1 = [X, d, 1] is the main design of the AIE code (no control
+    # function), so the control-function AIE formulas apply with eta = x1'b1 +
+    # off; the treatment equation and athrho get zero weight.
+    r <- .aie_target(S, S$bp_x1, b1, eta, stats::dnorm(eta))
+    est <- r$est
+    Jb[seq_len(p1)] <- r$J
+  } else {
+    di <- p1 - 1L                       # d is the column before _cons
+    d <- S$D[, 1]
+    e1 <- eta + b1[di] * (1 - d)
+    e0 <- eta - b1[di] * d
+    f1 <- stats::dnorm(e1)
+    f0 <- stats::dnorm(e0)
+    dphi <- f1 - f0
+    est <- mean(stats::pnorm(e1) - stats::pnorm(e0))
+    Jb[seq_len(p1)] <- colMeans(S$bp_x1 * dphi)
+    Jb[di] <- mean(f1)
+  }
   se2 <- drop(Jb %*% V %*% Jb)
   se <- if (se2 < 0) NA_real_ else sqrt(se2)
   z <- stats::qnorm(1 - (1 - S$level) / 2)

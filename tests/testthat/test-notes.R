@@ -39,12 +39,12 @@ test_that("a 0/1 endogenous regressor with a linear first stage is flagged as de
   expect_length(fx_calls$A1()$binlin, 0)
 
   # inside an endogenous interaction: the treatment is named, the product is
-  # not, and the advice to switch first stage is dropped
+  # not, and (0.22.0) the note points to the bivariate-probit interaction
   a <- apexog(ybb ~ x1 + x2, endog = db + db:x2 ~ z1 + z1:x2, data = fxdat,
               aie = c("db", "x2"), gmin = 0, gmax = 0, grid = 2, verbose = FALSE)
   expect_identical(a$binlin, "db")
   expect_true(has(a, "0/1 endogenous regressor with a linear first stage (db):"))
-  expect_true(has(a, "without a causal interpretation (see ?apexog)"))
+  expect_true(has(a, "reading use firststage = \"biprobit\" with the treatment alone"))
   expect_false(has(a, "firststage = \"biprobit\" or \"probit\""))
 })
 

@@ -20,7 +20,7 @@
 #'     noise (CHR 2012, eq. 7).  The prior-only spread is reported as well.}
 #' }
 #'
-#' This is an R port of the Stata command \code{apexog} (v0.21.2); results agree
+#' This is an R port of the Stata command \code{apexog} (v0.22.0); results agree
 #' with Stata to optimizer tolerance (about 1e-7 relative on the validation
 #' specifications).  Random draws differ between R and Stata, so LTZ intervals
 #' agree only in distribution unless the same \code{draws} are supplied.
@@ -72,7 +72,8 @@
 #'   \code{"probit"} (0/1 regressor, generalized residual), \code{"fprobit"}
 #'   (fractional regressor), \code{"poisson"} (count), or \code{"biprobit"}
 #'   (recursive bivariate probit for a single 0/1 regressor; exact under joint
-#'   normality).  A single value applies to every endogenous regressor,
+#'   normality; its APE, or since 0.22.0 its AIE with an exogenous
+#'   moderator).  A single value applies to every endogenous regressor,
 #'   including a declared interaction such as \code{d:x} (which needs
 #'   \code{"linear"}); otherwise give one value per endogenous regressor, in
 #'   order of appearance, or a named vector (unnamed regressors default to
@@ -86,7 +87,12 @@
 #'   regressor (\code{endog = d + d:x ~ ...}) that regressor is the target;
 #'   otherwise the product is taken from \code{formula} when it is written as
 #'   \code{x:z} or \code{x*z}, or added as an exogenous control.  Do not write
-#'   it as \code{I(x*z)}: that is detected as a duplicate and refused.
+#'   it as \code{I(x*z)}: that is detected as a duplicate and refused.  With
+#'   \code{firststage = "biprobit"} one of the two must be the 0/1 treatment and
+#'   the other an exogenous moderator; the product then enters only the outcome
+#'   equation of the joint fit (write the treatment alone in \code{endog},
+#'   e.g. \code{endog = d ~ z + z:m}), and the AIE is the interaction contrast
+#'   of the average structural function under joint normality.
 #' @param aie_binary Logical length-2 vector forcing the type of \code{X} and
 #'   \code{Z} (\code{TRUE} = binary, \code{FALSE} = continuous, \code{NA} =
 #'   detect from the data).  Continuous x continuous gives the cross-partial,
@@ -353,6 +359,11 @@ apexog <- function(formula, endog, data, method = c("uci", "ltz"),
   if (!all(fs %in% types))
     stop("Unknown firststage type; valid: ", paste(types, collapse = ", "), call. = FALSE)
   engine <- if (any(fs == "biprobit")) "biprobit" else "cf"
+  if (engine == "biprobit" && J > 1L && !is.null(aieendog))
+    stop("firststage = \"biprobit\" fits the 0/1 treatment jointly with the outcome, so ",
+         "the interaction needs no first stage of its own.  Write the treatment alone ",
+         "(endog = d ~ z + z:m), put the moderator among the controls and use ",
+         "aie = c(\"d\", \"m\").", call. = FALSE)
   if (engine == "biprobit" && J > 1L)
     stop("firststage = \"biprobit\" supports exactly one endogenous regressor.", call. = FALSE)
   for (j in seq_len(J)) {
@@ -382,8 +393,9 @@ apexog <- function(formula, endog, data, method = c("uci", "ltz"),
   if (!is.null(aie)) {
     if (length(aie) != 2L) stop("aie must name exactly two variables.", call. = FALSE)
     if (aie[1] == aie[2]) stop("The two AIE interactors must be distinct.", call. = FALSE)
-    if (engine == "biprobit")
-      stop("The AIE target is not available with firststage = \"biprobit\".", call. = FALSE)
+    if (engine == "biprobit" && !(endog_names[1] %in% aie))
+      stop("With firststage = \"biprobit\" the AIE target must interact the 0/1 treatment ",
+           endog_names[1], " with an exogenous moderator.", call. = FALSE)
     getv <- function(v) {
       if (v %in% colnames(X)) return(X[, v])
       if (v %in% endog_names && !grepl(":", v, fixed = TRUE)) return(D[, v])
@@ -395,6 +407,11 @@ apexog <- function(formula, endog, data, method = c("uci", "ltz"),
     if (length(aie_binary) != 2L) stop("aie_binary must have length 2.", call. = FALSE)
     xb <- if (is.na(aie_binary[1])) .is01(xv) else isTRUE(aie_binary[1])
     zb <- if (is.na(aie_binary[2])) .is01(zv) else isTRUE(aie_binary[2])
+    if (engine == "biprobit" && ((aie[1] == endog_names[1] && !xb) ||
+                                 (aie[2] == endog_names[1] && !zb)))
+      stop("With firststage = \"biprobit\" the treatment ", endog_names[1],
+           " enters the interaction as a 0/1 variable (aie_binary must not be FALSE ",
+           "for it).", call. = FALSE)
     case <- 2L * as.integer(xb) + as.integer(zb)
     lbl <- c("continuous-by-continuous (cross-partial)",
              paste0("continuous-by-binary (first difference in ", aie[2], ")"),
@@ -421,7 +438,9 @@ apexog <- function(formula, endog, data, method = c("uci", "ltz"),
     aie_info <- list(vars = aie, case = case, label = lbl, xz = xzname,
                      binary = c(xb, zb))
     .msg(verbose, "  [aie] target = ", lbl)
-    if (any(aie %in% endog_names))
+    if (any(aie %in% endog_names) && engine == "biprobit")
+      .msg(verbose, "  [note] AIE: the treatment is fit jointly with the outcome (recursive bivariate probit); the product enters the outcome equation only.")
+    else if (any(aie %in% endog_names))
       .msg(verbose, "  [note] AIE: one or both interactors are endogenous; the MT correction propagates first-stage uncertainty into the AIE SE.")
     targets <- "AIE"
   }
@@ -509,9 +528,12 @@ apexog <- function(formula, endog, data, method = c("uci", "ltz"),
   }
   if (engine == "biprobit") {
     S$bp_x1 <- cbind(X, D, 1)
-    S$bp_x2 <- cbind(Z, X, 1)
+    # v0.22.0: the treatment equation excludes an AIE product of the treatment
+    # and a moderator (EXOGMASK; all TRUE for an APE target)
+    S$bp_x2 <- cbind(Z, X[, EXOGMASK[1, ], drop = FALSE], 1)
     S$bp_names <- c(paste0(ylab, ":", c(colnames(X), endog_names, "(Intercept)")),
-                    paste0(endog_names, ":", c(colnames(Z), colnames(X), "(Intercept)")),
+                    paste0(endog_names, ":", c(colnames(Z), colnames(X)[EXOGMASK[1, ]],
+                                               "(Intercept)")),
                     "athrho")
   }
   fitter <- if (engine == "cf") .fit_cf else .fit_bp

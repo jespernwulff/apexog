@@ -49,7 +49,9 @@ print.apexog <- function(x, ...) {
           "           control-function model assumes, so the effect is a descriptive\n",
           sep = "")
       if (x$target == "aie") {
-        cat("           fitted contrast without a causal interpretation (see ?apexog).\n")
+        cat("           fitted contrast without a causal interpretation.  For a causal\n",
+            "           reading use firststage = \"biprobit\" with the treatment alone in\n",
+            "           endog and the moderator among the controls; see ?apexog.\n", sep = "")
       } else {
         cat("           fitted contrast without a causal interpretation.  For a causal\n",
             "           reading use firststage = \"biprobit\" or \"probit\"; see ?apexog.\n",

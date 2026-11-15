@@ -37,7 +37,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">apexog</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.22.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -208,8 +208,9 @@ errors, use the bivariate probit. apexog prints a note whenever a
 generalized-residual control function is in use. The same caveat applies
 to fractional (<code>"fprobit"</code>) and count
 (<code>"poisson"</code>) treatments, for which no exact alternative is
-available. The bivariate probit handles one endogenous regressor and the
-average partial effect, not interaction effects.</p>
+available. The bivariate probit handles one endogenous regressor; its
+target is the average partial effect or, with a moderator, the average
+interaction effect (see below).</p>
 </div>
 <div class="section level2">
 <h2 id="interaction-effects">Interaction effects<a class="anchor" aria-label="anchor" href="#interaction-effects"></a>
@@ -299,6 +300,55 @@ range. The same model in Stata:</p>
 <p>The control functions are held at their observed values when the
 moderator is switched, as in <code>ginteff</code> after the
 corresponding probit.</p>
+<p><strong>A binary treatment and a moderator.</strong> The construction
+above needs a continuous treatment: a 0/1 treatment cannot have a normal
+linear first stage, and its product with the moderator is a function of
+the two, so giving the product a first stage of its own defines no
+structural model (apexog prints a note when you try). Use the bivariate
+probit instead. Write the treatment alone in <code>endog</code>, keep
+the moderator among the controls and point <code>aie</code> at the pair;
+the product then enters only the outcome equation of the joint fit. The
+instruments may include the product of an instrument and the moderator,
+whose violation is then allowed for separately. In the
+<code>certification</code> data:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">certification</span><span class="op">)</span></span>
+<span><span class="va">bpi</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/apexog.html">apexog</a></span><span class="op">(</span><span class="va">promoted</span> <span class="op">~</span> <span class="va">tenure</span> <span class="op">+</span> <span class="va">manager</span>,</span>
+<span>              endog <span class="op">=</span> <span class="va">certified</span> <span class="op">~</span> <span class="va">subsidy</span> <span class="op">+</span> <span class="va">subsidy</span><span class="op">:</span><span class="va">manager</span>,</span>
+<span>              data <span class="op">=</span> <span class="va">certification</span>, firststage <span class="op">=</span> <span class="st">"biprobit"</span>,</span>
+<span>              aie <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"certified"</span>, <span class="st">"manager"</span><span class="op">)</span>,</span>
+<span>              gmin <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.1</span>, <span class="fl">0</span><span class="op">)</span>, gmax <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0</span><span class="op">)</span>, grid <span class="op">=</span> <span class="fl">5</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">bpi</span></span>
+<span><span class="co">#&gt; ------------------------------------------------------------------------------</span></span>
+<span><span class="co">#&gt; Plausibly-exogenous AIE bounds (CHR 2012, UCI method)</span></span>
+<span><span class="co">#&gt; Estimator: biprobit (recursive bivariate probit, MLE)  |  SE: delta method  |  N = 4000</span></span>
+<span><span class="co">#&gt; Target:    Average Interaction Effect (certified x manager): binary-by-binary (second discrete difference)</span></span>
+<span><span class="co">#&gt; ------------------------------------------------------------------------------</span></span>
+<span><span class="co">#&gt; Baseline (gamma = 0):</span></span>
+<span><span class="co">#&gt;     AIE(certified x manager) = -0.001289  (SE 0.029238)  [-0.058595, 0.056016]</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Scale:     1 latent-index unit of gamma = 0.3405 pr. points per unit of Z (avg., baseline)</span></span>
+<span><span class="co">#&gt;            1 structural-latent unit of gamma = 1.0000 latent-index units  (sigma_tilde = 1.0000)</span></span>
+<span><span class="co">#&gt;            biprobit: structural and index scales coincide (sigma_tilde = 1);</span></span>
+<span><span class="co">#&gt;            rho(eps_y, eps_d) at the baseline fit = 0.4598</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; UCI union over gamma grid (5 point(s) per instrument):</span></span>
+<span><span class="co">#&gt;     gamma_subsidy  range: [-0.1000, 0.1000]   exact Pr scale: [-0.0325, 0.0351]</span></span>
+<span><span class="co">#&gt;     gamma_subsidy:manager range: [0.0000, 0.0000]   exact Pr scale: [0.0000, 0.0000]</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     AIE(certified x manager) bounds = [-0.066247, 0.063972]</span></span>
+<span><span class="co">#&gt; ------------------------------------------------------------------------------</span></span></code></pre></div>
+<p>The AIE is now the second difference of the average structural
+function under joint normality of the outcome and treatment errors, the
+model the bivariate probit maintains. The model has one error
+correlation and one treatment equation for both values of the moderator.
+Under that restriction the interaction is also identified from treatment
+variation the instrument does not generate, so it can be much more
+precise than an instrumental-variable contrast and can differ from it;
+when the estimated correlation is near zero it is close to the AIE of a
+probit that treats the treatment as exogenous. In Stata:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode stata"><code class="sourceCode stata"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>apexog uci promoted tenure manager (certified = subsidy c.subsidy#i.manager), <span class="co">///</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>    firststage(<span class="kw">biprobit</span>) target(i.certified#i.manager) gmin(-0.1 0) gmax(0.1 0) <span class="bn">grid</span>(5)</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>

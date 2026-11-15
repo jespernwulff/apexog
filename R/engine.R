@@ -279,9 +279,13 @@
     Dphi <- f11 - f10 - f01 + f00
     Dq <- Dphi
     Jb <- colMeans(xm * Dphi)
-    Jb[ix] <- mean((1 - X) * (f11 - f10)) - mean(X * (f01 - f00))
-    Jb[iz] <- mean((1 - Zv) * (f11 - f01)) - mean(Zv * (f10 - f00))
-    Jb[ixz] <- mean(f11) - mean(XZ * Dphi)
+    # the interactors and their product enter eta^{jk} at the counterfactual
+    # values j, k and j*k, so their derivatives are phi_11 - phi_10,
+    # phi_11 - phi_01 and phi_11 (0.22.0 fix: through 0.21.2 these used j - X_i,
+    # k - Z_i and jk - X_i Z_i, wrong whenever X_i = 1 or Z_i = 1)
+    Jb[ix] <- mean(f11 - f10)
+    Jb[iz] <- mean(f11 - f01)
+    Jb[ixz] <- mean(f11)
   }
   list(est = est, J = Jb, Dq = Dq)
 }
