@@ -92,9 +92,10 @@ the controls. apexog adds the product `x:w` to the model (or uses it if the
 formula already contains it, as in `x * w`).
 
 **An endogenous treatment and a moderator.** When the treatment is endogenous
-its product with a moderator is endogenous too, and needs its own instrument:
-the product of the instrument and the moderator. Declare the product as a
-second endogenous regressor and point `aie` at the pair. apexog then adds the
+its product with a moderator is endogenous too, and the product of the
+instrument and the moderator belongs in the model. One way is to declare the
+product as a second endogenous regressor, instrumented by the instrument and
+its product with the moderator, and to point `aie` at the pair. apexog then adds the
 product of the two control functions to the main probit (`cfprobit`'s
 `cfinteract`). In the `promotion` data training pays off more under a
 supportive manager:
@@ -130,6 +131,17 @@ Baseline (gamma = 0):
 
 The control functions are held at their observed values when the moderator is
 switched, as in `ginteff` after the corresponding probit.
+
+The other way keeps the treatment alone, with the interacted instrument in its
+first stage: `endog = training ~ subsidy + subsidy:manager` (in Stata
+`(c.training = subsidy c.subsidy#i.manager)`). The control function of
+`training` then covers its product with `manager`, which needs no first stage
+of its own (Wooldridge 2015, pp. 428–429, 437). The interacted instrument is
+still needed: it lets the first stage of `training` differ with `manager`, and
+without it the control function, and with it the AIE, is wrong whenever the
+subsidy moves training differently for the two groups of employees. In the
+`promotion` data this form gives an AIE of 0.048 (SE 0.009) at *γ* = 0, against
+0.051 (SE 0.012) above.
 
 **A binary treatment and a moderator.** The construction above needs a
 continuous treatment: a 0/1 treatment cannot have a normal linear first stage,

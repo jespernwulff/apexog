@@ -101,7 +101,13 @@ control column or an endogenous regressor (use numeric 0/1 variables, not
 regressor (\code{endog = d + d:x ~ ...}) that regressor is the target;
 otherwise the product is taken from \code{formula} when it is written as
 \code{x:z} or \code{x*z}, or added as an exogenous control.  Do not write
-it as \code{I(x*z)}: that is detected as a duplicate and refused.  With
+it as \code{I(x*z)}: that is detected as a duplicate and refused.  When
+one interactor is an endogenous regressor in a clause of its own, its
+control function covers the product (Wooldridge 2015, pp. 428-429, 437), but
+list the instruments interacted with the moderator in that clause
+(e.g. \code{endog = d ~ z + z:x}): the control function is right only if
+the first stage lets the instrument's effect differ with the moderator,
+and the AIE is biased without them whenever it does.  With
 \code{firststage = "biprobit"} one of the two must be the 0/1 treatment and
 the other an exogenous moderator; the product then enters only the outcome
 equation of the joint fit (write the treatment alone in \code{endog},

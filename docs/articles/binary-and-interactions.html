@@ -253,12 +253,14 @@ the product <code>x:w</code> to the model (or uses it if the formula
 already contains it, as in <code>x * w</code>).</p>
 <p><strong>An endogenous treatment and a moderator.</strong> When the
 treatment is endogenous its product with a moderator is endogenous too,
-and needs its own instrument: the product of the instrument and the
-moderator. Declare the product as a second endogenous regressor and
-point <code>aie</code> at the pair. apexog then adds the product of the
-two control functions to the main probit (<code>cfprobit</code>’s
-<code>cfinteract</code>). In the <code>promotion</code> data training
-pays off more under a supportive manager:</p>
+and the product of the instrument and the moderator belongs in the
+model. One way is to declare the product as a second endogenous
+regressor, instrumented by the instrument and its product with the
+moderator, and to point <code>aie</code> at the pair. apexog then adds
+the product of the two control functions to the main probit
+(<code>cfprobit</code>’s <code>cfinteract</code>). In the
+<code>promotion</code> data training pays off more under a supportive
+manager:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">promotion</span><span class="op">)</span></span>
 <span><span class="va">aie</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/apexog.html">apexog</a></span><span class="op">(</span><span class="va">promoted</span> <span class="op">~</span> <span class="va">tenure</span> <span class="op">+</span> <span class="va">manager</span>,</span>
@@ -300,6 +302,19 @@ range. The same model in Stata:</p>
 <p>The control functions are held at their observed values when the
 moderator is switched, as in <code>ginteff</code> after the
 corresponding probit.</p>
+<p>The other way keeps the treatment alone, with the interacted
+instrument in its first stage:
+<code>endog = training ~ subsidy + subsidy:manager</code> (in Stata
+<code>(c.training = subsidy c.subsidy#i.manager)</code>). The control
+function of <code>training</code> then covers its product with
+<code>manager</code>, which needs no first stage of its own (Wooldridge
+2015, pp. 428–429, 437). The interacted instrument is still needed: it
+lets the first stage of <code>training</code> differ with
+<code>manager</code>, and without it the control function, and with it
+the AIE, is wrong whenever the subsidy moves training differently for
+the two groups of employees. In the <code>promotion</code> data this
+form gives an AIE of 0.048 (SE 0.009) at <em>γ</em> = 0, against 0.051
+(SE 0.012) above.</p>
 <p><strong>A binary treatment and a moderator.</strong> The construction
 above needs a continuous treatment: a 0/1 treatment cannot have a normal
 linear first stage, and its product with the moderator is a function of
