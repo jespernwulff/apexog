@@ -672,8 +672,12 @@ Examples
     cts-by-cts cross-partial, target(c.d#i.W) the cts-by-binary first
     difference (validated to machine precision against the manual
     decomposition for a binary exogenous moderator).  For a binary endogenous
-    treatment this path gives a descriptive contrast only (the header says
-    so); use firststage(biprobit) as in the example above.
+    treatment this path gives a descriptive contrast with a linear first
+    stage (the header says so) and, with a probit first stage (i. prefix),
+    rests on the generalized-residual approximation (the header notes that
+    too); neither has been validated against a matching data-generating
+    process.  For a joint model of the treatment use firststage(biprobit) as
+    in the example above.
 
     cfinteract scope.  cfinteract adds the pairwise products of the control
     functions.  For two endogenous regressors (the canonical
